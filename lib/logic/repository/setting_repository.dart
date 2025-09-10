@@ -2,12 +2,10 @@ import 'package:dartz/dartz.dart';
 
 import '../../data/data_provider/local_data_source.dart';
 import '../../data/data_provider/remote_data_source.dart';
-import '../../data/models/setting/website_setup_model.dart';
 import '../../presentation/errors/exception.dart';
 import '../../presentation/errors/failure.dart';
 
 abstract class SettingRepository {
-  Future<Either<Failure, WebsiteSetupModel>> getSetting();
 
   Either<Failure, bool> checkOnBoarding();
 
@@ -21,16 +19,16 @@ class SettingRepositoryImpl implements SettingRepository {
   SettingRepositoryImpl(
       {required this.remoteDataSources, required this.localDataSources});
 
-  @override
-  Future<Either<Failure, WebsiteSetupModel>> getSetting() async {
-    try {
-      final result = await remoteDataSources.getSetting();
-      final web = WebsiteSetupModel.fromMap(result);
-      return Right(web);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message, e.statusCode));
-    }
-  }
+  // @override
+  // Future<Either<Failure, WebsiteSetupModel>> getSetting() async {
+  //   try {
+  //     final result = await remoteDataSources.getSetting();
+  //     final web = WebsiteSetupModel.fromMap(result);
+  //     return Right(web);
+  //   } on ServerException catch (e) {
+  //     return Left(ServerFailure(e.message, e.statusCode));
+  //   }
+  // }
 
   @override
   Future<Either<Failure, bool>> cachedOnBoarding() async {

@@ -1,25 +1,19 @@
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
+// import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_picker/image_picker.dart';
+// import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/models/auth/login_state_model.dart';
-import '../../data/models/setting/currencies_model.dart';
 import '../../logic/bloc/login/login_bloc.dart';
-import '../../logic/cubit/currency/currency_cubit.dart';
 import '../../logic/cubit/setting/setting_cubit.dart';
 import '../routes/route_names.dart';
-import '../widgets/custom_image.dart';
 import '../widgets/custom_text.dart';
-import '../widgets/primary_button.dart';
 import 'constraints.dart';
-import 'k_images.dart';
 
 class Utils {
   static final _selectedDate = DateTime.now();
@@ -77,8 +71,7 @@ class Utils {
     return input[0].toUpperCase() + input.substring(1).toLowerCase();
   }
 
-  static String translatedText(BuildContext context, String key,
-      [bool lower = false]) {
+  static String translatedText(BuildContext context, String key, [bool lower = false]) {
     return key;
     // final webSetting = context.read<AppSettingCubit>().settingModel;
     // if (lower == true) {
@@ -96,9 +89,7 @@ class Utils {
     // }
   }
 
-  static String convertCurrency(
-      var price, BuildContext context, CurrenciesModel c,
-      [int radix = 1]) {
+  /*static String convertCurrency(var price, BuildContext context, CurrenciesModel c, [int radix = 1]) {
     String afterPrice = 'right';
     String afterPriceWithSpace = 'after_price_with_space';
     if (c.status == 1 && (c.currencyPosition.toLowerCase() == afterPrice)) {
@@ -138,25 +129,32 @@ class Utils {
       }
       return '${c.currencyIcon}${price * c.currencyRate.toStringAsFixed(radix)}';
     }
-  }
+  }*/
 
   static String formatAmount(BuildContext context, var price, [int radix = 1]) {
-    final cCubit = context.read<CurrencyCubit>();
     final sCubit = context.read<SettingCubit>();
-    if (cCubit.state.currencies.isNotEmpty) {
-      return Utils.convertCurrency(
-          price, context, cCubit.state.currencies.first, radix);
-    } else {
-      if (sCubit.settingModel != null &&
-          sCubit.settingModel!.setting.currencyIcon.isNotEmpty) {
-        String currency = sCubit.settingModel!.setting.currencyIcon;
-        final p = price.toString();
-        return '$currency$p';
-      } else {
-        final p = price.toString();
-        return '\$$p';
-      }
+    // if (cCubit.state.currencies.isNotEmpty) {
+    //   return Utils.convertCurrency(price, context, cCubit.state.currencies.first, radix);
+    // } else {
+    if (price is double) {
+      return price.toStringAsFixed(radix);
+      // final result = price * c.currencyRate;
+      // return '${c.currencyIcon}${result.toStringAsFixed(radix)}';
     }
+    if (price is String) {
+      final r = double.tryParse(price) ?? 0.0;
+      // final p = r * c.currencyRate;
+      // return '${c.currencyIcon}${p.toStringAsFixed(radix)}';
+
+      return r.toStringAsFixed(radix);
+    }
+    if (price is int) {
+      // debugPrint('int-price $price');
+      // final p = price * c.currencyRate;
+      // return '${c.currencyIcon}${p.toStringAsFixed(radix)}';
+      return price.toStringAsFixed(radix);
+    }
+    return price.toStringAsFixed(radix);
   }
 
   static String imageContent(BuildContext context, String key) {
@@ -168,27 +166,16 @@ class Utils {
     //}
   }
 
-  static Uri tokenWithCode(String url, String token, String langCode) {
-    return Uri.parse(url)
-        .replace(queryParameters: {'token': token, 'lang_code': langCode});
-  }
-
-  static Uri tokenWithQuery(String url, String token, String langCode,
-      {Map<String, dynamic>? extraParams}) {
+  static Uri tokenWithQuery(String url, String token, String langCode, {Map<String, dynamic>? extraParams}) {
     final baseUri = Uri.parse(url);
     final queryParams = {
       'token': token,
       'lang_code': langCode,
-      ...extraParams!,
+      ...extraParams??{},
     };
     return baseUri.replace(queryParameters: queryParams);
   }
 
-  static Uri tokenWithCodeAndPage(
-      String url, String token, String langCode, String page) {
-    return Uri.parse(url).replace(
-        queryParameters: {'token': token, 'lang_code': langCode, 'page': page});
-  }
 
   static BlocListener<LoginBloc, LoginStateModel> logoutListener() {
     return BlocListener<LoginBloc, LoginStateModel>(
@@ -241,16 +228,16 @@ class Utils {
     context.read<LoginBloc>().add(const LoginEventLogout());
   }
 
-  static Future<String?> pickSingleImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      return image.path;
-    }
-    return null;
-  }
+  /*  static Future<String?> pickSingleImage() async {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        return image.path;
+      }
+      return null;
+    }*/
 
-  static Future<List<String?>> pickMultipleImage() async {
+  /*static Future<List<String?>> pickMultipleImage() async {
     final ImagePicker picker = ImagePicker();
     final List<String> imageList = [];
     final List<XFile?> images = await picker.pickMultiImage();
@@ -262,9 +249,9 @@ class Utils {
       return imageList;
     }
     return [];
-  }
+  }*/
 
-  static Future<String?> pickSingleFile([bool isResume = false]) async {
+  /*static Future<String?> pickSingleFile([bool isResume = false]) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: isResume == true
@@ -281,24 +268,25 @@ class Utils {
       debugPrint('file path not found');
       return '';
     }
-  }
+  }*/
 
-  static Future<List<String>> pickMultipleFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['mp4', 'jpg', 'jpeg', 'zip', 'pdf', 'png'],
-        allowMultiple: true);
-    final List<String> fileList = [];
-    if (result != null && result.files.isNotEmpty) {
-      for (var file in result.files) {
-        if (file.path != null && file.path!.isNotEmpty) {
-          fileList.add(file.path!);
+  /*
+    static Future<List<String>> pickMultipleFile() async {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['mp4', 'jpg', 'jpeg', 'zip', 'pdf', 'png'],
+          allowMultiple: true);
+      final List<String> fileList = [];
+      if (result != null && result.files.isNotEmpty) {
+        for (var file in result.files) {
+          if (file.path != null && file.path!.isNotEmpty) {
+            fileList.add(file.path!);
+          }
         }
       }
-    }
-    debugPrint('pickMultipleFile $fileList');
-    return fileList;
-  }
+      debugPrint('pickMultipleFile $fileList');
+      return fileList;
+    }*/
 
   static String timeWithData(String data, [bool timeAndDate = true]) {
     if (timeAndDate) {
@@ -460,7 +448,7 @@ class Utils {
     FocusScope.of(context).requestFocus(FocusNode());
   }
 
-  static loadingDialog(
+  static void loadingDialog(
     BuildContext context, {
     bool barrierDismissible = false,
   }) {
@@ -564,58 +552,5 @@ class Utils {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(snackBar);
-  }
-
-  static exitFromAppDialog(BuildContext context) {
-    return Utils.showCustomDialog(
-      context,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 25.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CustomImage(path: 'KImages.exitApp'),
-            Utils.verticalSpace(8.0),
-            const CustomText(
-              text: 'Are you sure',
-              textAlign: TextAlign.center,
-              fontWeight: FontWeight.w700,
-              color: blackColor,
-              fontSize: 24.0,
-            ),
-            Utils.verticalSpace(4.0),
-            const CustomText(
-              text: 'You want to Exit?',
-              fontWeight: FontWeight.w500,
-              color: grayColor,
-              fontSize: 16.0,
-            ),
-            Utils.verticalSpace(16.0),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                PrimaryButton(
-                  text: 'Exit',
-                  onPressed: () {
-                    SystemNavigator.pop();
-                  },
-                  minimumSize: const Size(125.0, 45.0),
-                ),
-                const SizedBox(width: 12.0),
-                PrimaryButton(
-                  text: 'Cancel',
-                  onPressed: () => Navigator.pop(context),
-                  bgColor: redColor,
-                  textColor: whiteColor,
-                  minimumSize: const Size(125.0, 45.0),
-                ),
-              ],
-            ),
-            Utils.verticalSpace(14.0),
-          ],
-        ),
-      ),
-    );
   }
 }

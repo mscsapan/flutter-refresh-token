@@ -1,6 +1,8 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-import '../../utils/utils.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'component/bottom_navigation_bar.dart';
 import 'component/main_controller.dart';
 
@@ -28,11 +30,16 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final dCubit = context.read<DashboardCubit>();
-    return WillPopScope(
-      onWillPop: () async {
-        Utils.exitFromAppDialog(context);
-        return true;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
+        if (!didPop) {
+          if (Platform.isAndroid) {
+            SystemNavigator.pop();
+          } else if (Platform.isIOS) {
+            exit(0);
+          }
+        }
       },
       child: Scaffold(
         body: StreamBuilder<int>(

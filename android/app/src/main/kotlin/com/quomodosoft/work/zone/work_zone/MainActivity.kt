@@ -1,4 +1,4 @@
-package com.quomodosoft.work.zone.work_zone
+package com.quomodosoft.work.zone.flutter_template
 
 import io.flutter.embedding.android.FlutterActivity
 

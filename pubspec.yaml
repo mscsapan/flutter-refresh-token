@@ -1,4 +1,4 @@
-name: work_zone
+name: flutter_template
 description: "A new Flutter project."
 
 publish_to: 'none'
@@ -6,47 +6,48 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.4.1 <4.0.0'
+  sdk: '>=3.8.1 <4.0.0'
 
 
 dependencies:
   flutter:
     sdk: flutter
 
+  # ---------- UI & Styling ----------
+  flutter_svg: ^2.2.1               # Render SVG assets in Flutter
+  flutter_screenutil: ^5.9.3        # Responsive UI (screen size & pixel density adaptation)
+  google_fonts: ^6.3.1              # Use Google Fonts easily in Flutter
+  cupertino_icons: ^1.0.8           # iOS style icons for Cupertino widgets
+  cached_network_image: ^3.4.1      # Display & cache network images efficiently
 
-  flutter_svg: ^2.0.10+1
-  flutter_screenutil: ^5.9.3
-  google_fonts: ^6.2.1
-  intl: ^0.19.0
-  equatable: ^2.0.5
-  flutter_bloc: ^8.1.6
-  dartz: ^0.10.1
-  http: ^1.2.2
-  file_picker: ^8.1.2
-  image_picker: ^1.1.2
-  cached_network_image: ^3.4.1
-  pinput: ^5.0.0
-  expandable_page_view: ^1.0.17
-  flutter_html: ^3.0.0-beta.2
-  shared_preferences: ^2.3.2
-  webview_flutter: ^4.8.0
-  rename: ^3.0.2
-  connectivity: ^3.0.6
+  # ---------- State Management ----------
+  equatable: ^2.0.7                 # Simplifies equality checks in Dart classes (great for states/events)
+  flutter_bloc: ^9.1.1              # BLoC (Business Logic Component) state management
 
+  # ---------- Data & APIs ----------
+  dartz: ^0.10.1                    # Functional programming tools (Either, Option, etc.)
+  http: ^1.5.0                      # Make HTTP requests (REST APIs)
+  shared_preferences: ^2.5.3        # Store key-value pairs locally (lightweight persistent storage)
+  intl: ^0.20.2                     # Internationalization & date formatting
+  connectivity_plus: ^6.1.5         # Check network connectivity status
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
+  # ---------- Optional/Commented Packages ----------
+  # file_picker: ^10.3.2             # Pick files from device storage
+  # image_picker: ^1.2.0             # Pick images from gallery/camera
+  # pinput: ^5.0.2                   # PIN input widget
+  # expandable_page_view: ^1.0.17    # Expandable PageView with features
+  # flutter_html: ^3.0.0             # Render HTML content inside Flutter
+  # webview_flutter: ^4.13.0         # Embed WebViews in Flutter
+  rename: ^3.1.0                   # CLI tool to rename the Flutter project
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^4.0.0
-  flutter_launcher_icons: ^0.13.1
+  flutter_lints: ^6.0.0             # Recommended linting rules
+  flutter_launcher_icons: ^0.14.4   # Generate app launcher icons for iOS/Android
 
 flutter:
-
   uses-material-design: true
 
   assets:
@@ -54,12 +55,9 @@ flutter:
     - assets/icons/
     - assets/images/
 
-
-#flutter_launcher_icons:
-#  android: "launcher_icon"
-#  ios: true
-#  image_path: "assets/launcher_icon.png"
-#  min_sdk_android: 21
-#  remove_alpha_ios: true
-
-
+# flutter_launcher_icons:
+#   android: "launcher_icon"
+#   ios: true
+#   image_path: "assets/launcher_icon.png"
+#   min_sdk_android: 21
+#   remove_alpha_ios: true

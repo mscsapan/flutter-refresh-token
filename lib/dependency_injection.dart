@@ -45,7 +45,6 @@ class DInjector {
 
   static final blocProviders = <BlocProvider>[
     BlocProvider<InternetStatusBloc>(create: (context) => InternetStatusBloc()),
-    BlocProvider<CurrencyCubit>(create: (context) => CurrencyCubit()),
     BlocProvider<LoginBloc>(
       create: (BuildContext context) => LoginBloc(repository: context.read()),
     ),

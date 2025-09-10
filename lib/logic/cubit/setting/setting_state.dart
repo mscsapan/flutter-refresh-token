@@ -15,14 +15,14 @@ class SettingStateLoading extends SettingState {
   const SettingStateLoading();
 }
 
-class SettingStateLoaded extends SettingState {
-  final WebsiteSetupModel settingModel;
-
-  const SettingStateLoaded(this.settingModel);
-
-  @override
-  List<Object> get props => [settingModel];
-}
+// class SettingStateLoaded extends SettingState {
+//   final WebsiteSetupModel settingModel;
+//
+//   const SettingStateLoaded(this.settingModel);
+//
+//   @override
+//   List<Object> get props => [settingModel];
+// }
 
 class SettingStateError extends SettingState {
   final String message;

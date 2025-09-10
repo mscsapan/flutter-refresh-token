@@ -16,11 +16,11 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
   await DInjector.initDB();
-  runApp(const WorkZone());
+  runApp(const TemplateProject());
 }
 
-class WorkZone extends StatelessWidget {
-  const WorkZone({super.key});
+class TemplateProject extends StatelessWidget {
+  const TemplateProject({super.key});
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -40,18 +40,20 @@ class WorkZone extends StatelessWidget {
               theme: MyTheme.theme,
               onUnknownRoute: (RouteSettings settings) {
                 return MaterialPageRoute(
-                  builder: (_) => Scaffold(
-                    body: FetchErrorText(
-                        text: 'No Route Found ${settings.name}',
-                        textColor: blackColor),
-                  ),
+                  builder: (BuildContext context){
+                    return Scaffold(
+                      body: FetchErrorText(
+                          text: 'No Route Found ${settings.name}',
+                          textColor: blackColor),
+                    );
+                  },
                 );
               },
               builder: (context, child) {
                 return MediaQuery(
                   data: MediaQuery.of(context)
                       .copyWith(textScaler: const TextScaler.linear(1.0)),
-                  child: child!,
+                  child: child??SizedBox(),
                 );
               },
             ),

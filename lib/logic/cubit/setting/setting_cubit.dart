@@ -1,19 +1,18 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../data/models/setting/website_setup_model.dart';
 import '../../repository/setting_repository.dart';
 
 part 'setting_state.dart';
 
 class SettingCubit extends Cubit<SettingState> {
   final SettingRepository _repository;
-  WebsiteSetupModel? settingModel;
+  // WebsiteSetupModel? settingModel;
 
   SettingCubit({required SettingRepository repository})
       : _repository = repository,
         super(const SettingInitial()) {
-    getSetting();
+    // getSetting();
   }
 
   bool get showOnBoarding =>
@@ -24,7 +23,7 @@ class SettingCubit extends Cubit<SettingState> {
     result.fold((l) => false, (r) => r);
   }
 
-  Future<void> getSetting() async {
+  /*Future<void> getSetting() async {
     emit(const SettingStateLoading());
     final result = await _repository.getSetting();
     result.fold((failure) {
@@ -33,5 +32,5 @@ class SettingCubit extends Cubit<SettingState> {
       settingModel = success;
       emit(SettingStateLoaded(success));
     });
-  }
+  }*/
 }

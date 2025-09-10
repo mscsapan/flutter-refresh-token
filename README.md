@@ -1,4 +1,4 @@
-# work_zone
+# flutter_template
 
 A new Flutter project.
 
