@@ -1,4 +1,4 @@
-import 'failure.dart';
+import 'errors_model.dart';
 
 class ServerException implements Exception {
   final String message;
@@ -38,8 +38,14 @@ class UnauthorisedException extends ServerException {
   const UnauthorisedException(super.message, [super.statusCode = 401]);
 }
 
-class InvalidInputException extends InvalidAuthData {
-  const InvalidInputException(super.errors, [int statusCode = 400]);
+class InvalidAuthDataException implements Exception {
+  final Errors errors;
+
+  const InvalidAuthDataException(this.errors);
+}
+
+class InvalidInputException extends InvalidAuthDataException {
+  const InvalidInputException(super.errors);
 }
 
 class InternalServerException extends ServerException {

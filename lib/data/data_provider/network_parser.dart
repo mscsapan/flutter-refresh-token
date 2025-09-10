@@ -72,7 +72,7 @@ class NetworkParser {
         final errorMsg = parsingError(response.body);
         debugPrint("errorMsg");
         debugPrint(errorMsg.toString());
-        throw InvalidInputException(Errors.fromMap(errorMsg), 422);
+        throw InvalidInputException(Errors.fromMap(errorMsg));
       case 500:
 
         ///500 Internal Server Error

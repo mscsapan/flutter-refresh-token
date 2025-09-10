@@ -13,12 +13,15 @@ class DInjector {
   }
 
   static final repositoryProvider = <RepositoryProvider>[
+    // Core dependencies
     RepositoryProvider<Client>(
       create: (context) => Client(),
     ),
     RepositoryProvider<SharedPreferences>(
       create: (context) => _sharedPreferences,
     ),
+
+    // Data sources
     RepositoryProvider<RemoteDataSource>(
       create: (context) => RemoteDataSourceImpl(
         client: context.read(),
@@ -29,6 +32,8 @@ class DInjector {
         sharedPreferences: context.read(),
       ),
     ),
+
+    // Repository implementations
     RepositoryProvider<AuthRepository>(
       create: (context) => AuthRepositoryImpl(
         remoteDataSources: context.read(),
@@ -41,27 +46,37 @@ class DInjector {
         localDataSources: context.read(),
       ),
     ),
+
+    // Use cases
+    RepositoryProvider<LoginUseCase>(
+      create: (context) => LoginUseCase(context.read<AuthRepository>()),
+    ),
+    RepositoryProvider<LogoutUseCase>(
+      create: (context) => LogoutUseCase(context.read<AuthRepository>()),
+    ),
+    RepositoryProvider<GetExistingUserInfoUseCase>(
+      create: (context) => GetExistingUserInfoUseCase(context.read<AuthRepository>()),
+    ),
+    RepositoryProvider<GetSettingUseCase>(
+      create: (context) => GetSettingUseCase(context.read<SettingRepository>()),
+    ),
   ];
 
   static final blocProviders = <BlocProvider>[
-    BlocProvider<InternetStatusBloc>(create: (context) => InternetStatusBloc()),
+    BlocProvider<InternetStatusBloc>(
+      create: (context) => InternetStatusBloc(),
+    ),
     BlocProvider<LoginBloc>(
-      create: (BuildContext context) => LoginBloc(repository: context.read()),
+      create: (BuildContext context) => LoginBloc(
+        loginUseCase: context.read<LoginUseCase>(),
+        logoutUseCase: context.read<LogoutUseCase>(),
+        getExistingUserInfoUseCase: context.read<GetExistingUserInfoUseCase>(),
+      ),
     ),
     BlocProvider<SettingCubit>(
-      create: (BuildContext context) =>
-          SettingCubit(repository: context.read()),
+      create: (BuildContext context) => SettingCubit(
+        getSettingUseCase: context.read<GetSettingUseCase>(),
+      ),
     ),
-
-    // BlocProvider<PasswordChangeCubit>(
-    //   create: (BuildContext context) => PasswordChangeCubit(
-    //     sellerProfileRepository: context.read(),
-    //     loginBloc: context.read(),
-    //   ),
-    // ),
-
-    // BlocProvider<PasswordCubit>(
-    //   create: (BuildContext context) => PasswordCubit(),
-    // ),
   ];
 }
