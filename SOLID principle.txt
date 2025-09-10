@@ -1,0 +1,61 @@
+Yes—your project’s architecture follows SOLID.
+
+What I did
+•  Scanned your codebase to understand the layer boundaries and dependencies.
+•  Added a clear “SOLID Principles in This Architecture” section to README.md that maps each SOLID principle to concrete parts of your project (files and layers).
+
+Summary of SOLID compliance
+•  SRP: Use cases, entities, repositories, data sources, and BLoCs each have a single responsibility.
+•  OCP: New features are added by creating new use cases/repositories/impls without modifying existing code; DI wiring enables extension.
+•  LSP: Use cases rely on repository interfaces; implementations like AuthRepositoryImpl can be swapped without breaking callers.
+•  ISP: Separate repository interfaces (auth, settings) prevent “fat” contracts; presentation depends on use cases, not broad services.
+•  DIP: High-level modules (presentation/usecases) depend on abstractions (repository interfaces); DI injects concrete implementations.
+
+
+
+
+Example
+
+Yes — the refactor to Clean Architecture with Bloc was explicitly shaped to follow SOLID. Here’s how each principle is reflected in your project:
+
+1) Single Responsibility Principle (SRP)
+•  Use cases: Each use case does exactly one thing (e.g., LoginUseCase logs in, LogoutUseCase logs out, GetSettingUseCase fetches settings).
+•  Blocs/Cubits: LoginBloc only coordinates auth UI state; SettingCubit only manages settings UI state.
+•  Data sources: RemoteDataSource handles HTTP; LocalDataSource handles persistence.
+•  Mappers: auth_mappers.dart only converts between data models and domain entities.
+•  Entities/Models: Domain entities are pure business data; data models are API/storage-facing.
+
+2) Open/Closed Principle (OCP)
+•  Add features without modifying core contracts:
+•  Add new use cases by introducing new classes (closed for modification, open for extension).
+•  Add new data sources or endpoints by extending RemoteDataSource/LocalDataSource implementations or adding new ones.
+•  Add new repositories or replace implementations without changing calling code.
+•  Mappers are extension-based, so adding new mappings doesn’t require changing existing code.
+
+3) Liskov Substitution Principle (LSP)
+•  Repository implementations substitute their interfaces:
+•  AuthRepositoryImpl fully conforms to AuthRepository — any caller depending on AuthRepository works if the implementation is swapped.
+•  SettingRepositoryImpl conforms to SettingRepository similarly.
+•  Data sources follow the same pattern (RemoteDataSourceImpl implements RemoteDataSource).
+
+4) Interface Segregation Principle (ISP)
+•  Narrow, feature-scoped interfaces:
+•  Separate AuthRepository and SettingRepository interfaces — consumers don’t depend on methods they don’t use.
+•  Use cases have small, single-purpose call signatures (LoginUseCase, LogoutUseCase, etc.).
+•  Presentation depends only on the use case it needs (LoginBloc doesn’t depend on settings, SettingCubit doesn’t depend on auth).
+
+5) Dependency Inversion Principle (DIP)
+•  High-level modules depend on abstractions, not concretions:
+•  Presentation layer depends on use cases (abstractions of behavior), not on data sources or http.
+•  Domain depends on repository interfaces, not concrete networking or storage.
+•  Composition root (dependency_injection.dart) wires concretions:
+•  Binds AuthRepositoryImpl to AuthRepository, SettingRepositoryImpl to SettingRepository.
+•  Binds use cases to repositories, and blocs/cubits to use cases.
+•  Error handling uses Failure abstraction (core/error/failures.dart) so callers depend on a stable error contract instead of concrete exceptions.
+
+TL;DR
+•  SRP: Clear responsibilities per class (use cases, blocs, data sources, mappers, entities).
+•  OCP: New features via new use cases/impls without touching existing ones.
+•  LSP: Impl classes can replace their interfaces seamlessly (repositories, data sources).
+•  ISP: Small, focused interfaces (auth vs setting repos; single-purpose use cases).
+•  DIP: UI → use cases → repository interfaces; concrete bindings only in DI.

@@ -349,6 +349,39 @@ flutter analyze
 - **Maintainability**: Clear structure makes code easier to understand and modify
 - **Team Development**: Multiple developers can work on different layers simultaneously
 
+## 🧭 SOLID Principles in This Architecture
+
+This project follows SOLID principles through its Clean Architecture structure and layering:
+
+- Single Responsibility Principle (SRP)
+  - Each component has one reason to change:
+    - Use cases (e.g., lib/domain/usecases/auth/login_usecase.dart) encapsulate one business action.
+    - Entities (lib/domain/entities/) model domain data only.
+    - Repository interfaces (lib/domain/repositories/) define contracts.
+    - Repository implementations (lib/data/repositories/) handle data orchestration and mapping.
+    - Data sources (lib/data/data_provider/) focus on a single IO concern each (remote vs local).
+    - BLoC/Cubit classes (lib/presentation/bloc/, lib/presentation/cubit/) manage UI state for one feature.
+
+- Open/Closed Principle (OCP)
+  - The system is open for extension but closed for modification:
+    - Add a new feature by creating new entity, use case, repository interface/impl, data source methods, and BLoC without changing existing code.
+    - Dependency wiring occurs in lib/dependency_injection.dart, allowing you to extend behavior by registering new implementations rather than editing consumers.
+
+- Liskov Substitution Principle (LSP)
+  - High-level code depends on abstractions and remains valid if implementations are swapped:
+    - Use cases depend on AuthRepository/SettingRepository interfaces (lib/domain/repositories/).
+    - Concrete implementations (e.g., lib/data/repositories/auth_repository_impl.dart) can be replaced (e.g., different APIs, caching) without breaking callers.
+
+- Interface Segregation Principle (ISP)
+  - Clients depend on focused interfaces rather than “fat” ones:
+    - Separate repository interfaces per bounded context (auth_repository.dart, setting_repository.dart) keep contracts small and specific.
+    - Presentation depends on use cases, not broad service classes, avoiding unused methods.
+
+- Dependency Inversion Principle (DIP)
+  - High-level policies do not depend on low-level details:
+    - Presentation → Use cases → Repository interfaces (abstractions) → Data layer provides concrete implementations.
+    - lib/dependency_injection.dart inverts control by supplying concrete types to abstract dependencies at composition time.
+
 ---
 
 **Happy Coding!** 🚀
