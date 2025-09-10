@@ -1,0 +1,86 @@
+The Mapper Folder Explained
+
+The lib/data/mappers/ folder contains data transformation logic that converts between different object representations in your Clean Architecture. Here's what it does:
+
+Purpose
+Mappers bridge the gap between:
+•  Data Models (used in the data layer for API/database operations)
+•  Domain Entities (used in business logic and presentation)
+
+Why Mappers Are Needed
+
+// Data Model (from API response)
+class UserResponseModel {
+  final String accessToken;
+  final String tokenType;
+  final int isVendor;
+  // Contains JSON serialization methods
+}
+
+// Domain Entity (pure business object)
+class AuthResponse {
+  final String accessToken;
+  final String tokenType;
+  final int isVendor;
+  // No JSON methods - clean business object
+}
+
+
+
+What's in auth_mappers.dart
+
+The file contains 4 extension methods:
+
+// 1. Data → Domain (API response to business entity)
+extension UserResponseModelAuthMapper on UserResponseModel {
+  AuthResponse toDomain() {
+    return AuthResponse(
+      accessToken: accessToken,
+      tokenType: tokenType,
+      isVendor: isVendor,
+      expireIn: expireIn,
+      user: user?.toDomain(), // Nested mapping
+    );
+  }
+}
+
+// 2. Domain → Data (business entity to storage model)
+extension AuthResponseDomainMapper on AuthResponse {
+  UserResponseModel toData() {
+    return UserResponseModel(
+      accessToken: accessToken,
+      tokenType: tokenType,
+      isVendor: isVendor,
+      expireIn: expireIn,
+      user: user?.toData(), // Nested mapping
+    );
+  }
+}
+
+
+
+
+Usage in Repository Implementation
+lib/data/repositories/auth_repository_impl.dart (28-31)
+
+// In AuthRepositoryImpl.login()
+final result = await remoteDataSources.login(loginModel);
+localDataSources.cacheUserResponse(result);
+return Right(result.toDomain()); // <- Mapper converts data model to domain entity
+
+
+Key Benefits
+
+1. Layer Separation: Data layer models can have JSON/database concerns, while domain entities stay pure
+2. Flexibility: Can handle API field name differences (expires_in → expireIn)
+3. Testability: Easy to test transformations in isolation
+4. Type Safety: Compile-time checking of conversions
+
+Clean Architecture Compliance
+
+This follows Dependency Rule:
+•  Domain entities don't know about data models
+•  Data models can reference domain entities (through mappers)
+•  Presentation layer only sees domain entities
+
+The mappers ensure your business logic stays independent from external API changes!
