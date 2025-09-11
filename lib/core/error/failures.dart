@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../presentation/errors/errors_model.dart';
+import '../../data/models/errors/errors_model.dart';
 
 abstract class Failure extends Equatable {
   final String message;
@@ -28,7 +28,7 @@ class InvalidAuthDataFailure extends Failure {
   final Errors errors;
 
   const InvalidAuthDataFailure(this.errors) : super('');
-  
+
   @override
   List<Object> get props => [errors, message, statusCode];
 }

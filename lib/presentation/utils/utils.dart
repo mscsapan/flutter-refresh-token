@@ -8,9 +8,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 // import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
-import '../../data/models/auth/login_state_model.dart';
-import '../../logic/bloc/login/login_bloc.dart';
-import '../../logic/cubit/setting/setting_cubit.dart';
+import '../bloc/auth/login_bloc.dart';
+import '../cubit/setting/setting_cubit.dart';
 import '../routes/route_names.dart';
 import '../widgets/custom_text.dart';
 import 'constraints.dart';
@@ -177,18 +176,17 @@ class Utils {
   }
 
 
-  static BlocListener<LoginBloc, LoginStateModel> logoutListener() {
-    return BlocListener<LoginBloc, LoginStateModel>(
+  static BlocListener<LoginBloc, LoginState> logoutListener() {
+    return BlocListener<LoginBloc, LoginState>(
       listener: (context, state) {
-        final logout = state.loginState;
-        if (logout is LoginStateLogoutLoading) {
+        if (state is LogoutLoading) {
           Utils.loadingDialog(context);
         } else {
           Utils.closeDialog(context);
-          if (logout is LoginStateLogoutError) {
-            Utils.errorSnackBar(context, logout.message);
-          } else if (logout is LoginStateLogoutLoaded) {
-            Utils.showSnackBar(context, logout.message);
+          if (state is LogoutError) {
+            Utils.errorSnackBar(context, state.message);
+          } else if (state is LogoutLoaded) {
+            Utils.showSnackBar(context, state.message);
             Navigator.pushNamedAndRemoveUntil(
               context,
               RouteNames.authScreen,
@@ -201,17 +199,16 @@ class Utils {
   }
 
   static Widget logout({required Widget child}) {
-    return BlocListener<LoginBloc, LoginStateModel>(
+    return BlocListener<LoginBloc, LoginState>(
       listener: (context, state) {
-        final logout = state.loginState;
-        if (logout is LoginStateLogoutLoading) {
+        if (state is LogoutLoading) {
           Utils.loadingDialog(context);
         } else {
           Utils.closeDialog(context);
-          if (logout is LoginStateLogoutError) {
-            Utils.errorSnackBar(context, logout.message);
-          } else if (logout is LoginStateLogoutLoaded) {
-            Utils.showSnackBar(context, logout.message);
+          if (state is LogoutError) {
+            Utils.errorSnackBar(context, state.message);
+          } else if (state is LogoutLoaded) {
+            Utils.showSnackBar(context, state.message);
             Navigator.pushNamedAndRemoveUntil(
               context,
               RouteNames.authScreen,

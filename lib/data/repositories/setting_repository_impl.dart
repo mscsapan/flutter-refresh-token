@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../core/error/failures.dart';
 import '../../domain/repositories/setting_repository.dart';
-import '../../presentation/errors/exception.dart';
+import '../../presentation/exceptions/exception.dart';
 import '../data_provider/local_data_source.dart';
 import '../data_provider/remote_data_source.dart';
 

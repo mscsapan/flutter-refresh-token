@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'core/config/env_config.dart';
+import 'core/services/navigation_service.dart';
 import 'dependency_injection.dart';
 import 'presentation/routes/route_names.dart';
 import 'presentation/utils/constraints.dart';
@@ -11,6 +13,10 @@ import 'presentation/widgets/fetch_error_text.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize environment configuration
+  EnvConfig.setEnvironment(Environment.development);
+  
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -34,6 +40,7 @@ class TemplateProject extends StatelessWidget {
           child: MultiBlocProvider(
             providers: DInjector.blocProviders,
             child: MaterialApp(
+              navigatorKey: NavigationService.navigatorKey,
               debugShowCheckedModeBanner: false,
               onGenerateRoute: RouteNames.generateRoutes,
               initialRoute: RouteNames.splashScreen,

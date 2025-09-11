@@ -21,4 +21,4 @@ export 'data/repositories/setting_repository_impl.dart';
 // Presentation layer exports
 export 'presentation/bloc/auth/login_bloc.dart';
 export 'presentation/cubit/setting/setting_cubit.dart';
-export 'logic/bloc/internet_status/internet_status_bloc.dart';
+export 'presentation/bloc/internet_status/internet_status_bloc.dart';

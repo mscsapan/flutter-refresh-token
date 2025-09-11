@@ -1,11 +1,11 @@
 import 'package:http/http.dart' as http;
 
-import '../models/auth/login_state_model.dart';
+import '../models/auth/login_model.dart';
 import 'network_parser.dart';
 import 'remote_url.dart';
 
 abstract class RemoteDataSource {
-  Future login(LoginStateModel body);
+  Future login(LoginModel body);
 
   Future logout(String token);
 
@@ -31,7 +31,7 @@ class RemoteDataSourceImpl extends RemoteDataSource {
   };
 
   @override
-  Future login(LoginStateModel body) async {
+  Future login(LoginModel body) async {
     final uri = Uri.parse(RemoteUrls.login);
     final clientMethod = client.post(uri, body: body.toMap(), headers: headers);
     final responseJsonBody =

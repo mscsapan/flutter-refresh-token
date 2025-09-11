@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../presentation/errors/exception.dart';
+import '../../presentation/exceptions/exception.dart';
 import '../../presentation/utils/k_string.dart';
 import '../models/auth/user_response_model.dart';
 

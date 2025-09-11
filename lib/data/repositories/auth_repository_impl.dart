@@ -3,11 +3,11 @@ import 'package:dartz/dartz.dart';
 import '../../core/error/failures.dart';
 import '../../domain/entities/auth_response.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../../presentation/errors/exception.dart';
+import '../../presentation/exceptions/exception.dart';
 import '../data_provider/local_data_source.dart';
 import '../data_provider/remote_data_source.dart';
 import '../mappers/auth_mappers.dart';
-import '../models/auth/login_state_model.dart';
+import '../models/auth/login_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final RemoteDataSource remoteDataSources;
@@ -24,7 +24,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final loginModel = LoginStateModel(email: email, password: password);
+      final loginModel = LoginModel(email: email, password: password);
       final result = await remoteDataSources.login(loginModel);
       localDataSources.cacheUserResponse(result);
       return Right(result.toDomain());

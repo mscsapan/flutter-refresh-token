@@ -79,7 +79,7 @@ lib/
 │   │   └── auth_mappers.dart       # Data ↔ Domain entity mappers
 │   ├── models/
 │   │   └── auth/
-│   │       ├── login_state_model.dart    # Login request model
+│   │       ├── login_model.dart          # Login request model
 │   │       └── user_response_model.dart  # API response model
 │   └── repositories/
 │       ├── auth_repository_impl.dart     # Auth repository implementation
@@ -87,10 +87,14 @@ lib/
 │
 ├── presentation/                   # UI Layer
 │   ├── bloc/
-│   │   └── auth/
-│   │       ├── login_bloc.dart     # Authentication BLoC
-│   │       ├── login_event.dart    # Login events
-│   │       └── login_state.dart    # Login states
+│   │   ├── auth/
+│   │   │   ├── login_bloc.dart     # Authentication BLoC
+│   │   │   ├── login_event.dart    # Login events
+│   │   │   └── login_state.dart    # Login states
+│   │   └── internet_status/
+│   │       ├── internet_status_bloc.dart  # Network connectivity BLoC
+│   │       ├── internet_status_event.dart # Network events
+│   │       └── internet_status_state.dart # Network states
 │   ├── cubit/
 │   │   └── setting/
 │   │       ├── setting_cubit.dart  # Settings Cubit
@@ -103,12 +107,7 @@ lib/
 │   ├── widgets/                   # Reusable UI components
 │   ├── routes/                    # App routing
 │   ├── utils/                     # UI utilities and constants
-│   └── errors/                    # Error handling models
-│
-├── logic/                         # Legacy layer (to be migrated)
-│   ├── bloc/                      # Existing BLoCs
-│   ├── cubit/                     # Existing Cubits
-│   └── repository/                # Legacy repositories
+│   └── exceptions/                # Infrastructure exceptions & UI errors
 │
 ├── dependency_injection.dart       # Dependency injection setup
 ├── dependency_injection_packages.dart # DI exports
@@ -496,12 +495,28 @@ flutter test
 flutter analyze
 ```
 
-## 📋 Migration Notes
+## 📋 Architecture Notes
 
-- Legacy code under `logic/` directory is preserved for backward compatibility
-- New features should use the Clean Architecture structure under `domain/`, `data/`, and `presentation/`
-- Gradually migrate existing features to the new architecture when making updates
-- The dependency injection system supports both old and new patterns during transition
+- **Clean Architecture**: The project follows Robert C. Martin's Clean Architecture principles
+- **SOLID Compliance**: Each layer adheres to SOLID principles for maintainable, testable code
+- **Layer Independence**: Domain layer is completely independent of external frameworks
+- **Dependency Injection**: All dependencies are injected through the DI container
+- **State Management**: Uses BLoC pattern with clean separation between events, states, and business logic
+
+### ✨ Code Cleanup (Resolved Duplication Issue)
+
+**Problem**: There were duplicate BLoC/Cubit implementations:
+- `lib/logic/bloc/` and `lib/logic/cubit/` (Legacy pattern)
+- `lib/presentation/bloc/` and `lib/presentation/cubit/` (Clean Architecture pattern)
+
+**Solution**: 
+- ❌ **Removed** `lib/logic/` folder completely
+- ✅ **Moved** `InternetStatusBloc` to `lib/presentation/bloc/internet_status/`
+- ✅ **Updated** all imports to use Clean Architecture pattern
+- ✅ **Created** new `LoginModel` to replace legacy `LoginStateModel`
+- ✅ **Fixed** all references to use new clean implementations
+
+**Result**: Single source of truth with proper Clean Architecture structure!
 
 ## 🎯 Benefits of This Architecture
 

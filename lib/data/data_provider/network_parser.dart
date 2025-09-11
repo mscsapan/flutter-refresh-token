@@ -7,14 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../../data/data_provider/remote_data_source.dart';
-import '../../presentation/errors/errors_model.dart';
-import '../../presentation/errors/exception.dart';
+import '../models/errors/errors_model.dart';
+import '../../presentation/exceptions/exception.dart';
 
 class NetworkParser {
   static const _className = 'RemoteDataSourceImpl';
 
   static Future<dynamic> callClientWithCatchException(
-      CallClientMethod callClientMethod) async {
+    CallClientMethod callClientMethod,
+  ) async {
     try {
       final response = await callClientMethod();
       log(response.statusCode.toString(), name: _className);
@@ -80,7 +81,9 @@ class NetworkParser {
 
       default:
         throw FetchDataException(
-            'Error occur while communication with Server', response.statusCode);
+          'Error occur while communication with Server',
+          response.statusCode,
+        );
     }
   }
 

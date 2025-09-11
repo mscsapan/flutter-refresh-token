@@ -1,4 +1,4 @@
-import 'errors_model.dart';
+import '../../data/models/errors/errors_model.dart';
 
 class ServerException implements Exception {
   final String message;

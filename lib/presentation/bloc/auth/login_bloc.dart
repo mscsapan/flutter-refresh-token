@@ -10,7 +10,7 @@ import '../../../domain/entities/auth_response.dart';
 import '../../../domain/usecases/auth/get_existing_user_info_usecase.dart';
 import '../../../domain/usecases/auth/login_usecase.dart';
 import '../../../domain/usecases/auth/logout_usecase.dart';
-import '../../errors/errors_model.dart';
+import '../../../data/models/errors/errors_model.dart';
 
 part 'login_event.dart';
 part 'login_state.dart';
@@ -30,27 +30,23 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     required LoginUseCase loginUseCase,
     required LogoutUseCase logoutUseCase,
     required GetExistingUserInfoUseCase getExistingUserInfoUseCase,
-  })  : _loginUseCase = loginUseCase,
-        _logoutUseCase = logoutUseCase,
-        _getExistingUserInfoUseCase = getExistingUserInfoUseCase,
-        super(const LoginInitial()) {
-    
+  }) : _loginUseCase = loginUseCase,
+       _logoutUseCase = logoutUseCase,
+       _getExistingUserInfoUseCase = getExistingUserInfoUseCase,
+       super(const LoginInitial()) {
     on<LoginEventSubmit>(_onLoginSubmit);
     on<LoginEventLogout>(_onLogout);
-    
+
     // Load existing user info on initialization
     _loadExistingUser();
   }
 
   void _loadExistingUser() {
     final result = _getExistingUserInfoUseCase(NoParams());
-    result.fold(
-      (failure) => _user = null,
-      (success) {
-        saveUserData = success;
-        log('Existing user loaded: $success', name: 'saved-user-data');
-      },
-    );
+    result.fold((failure) => _user = null, (success) {
+      saveUserData = success;
+      log('Existing user loaded: $success', name: 'saved-user-data');
+    });
   }
 
   Future<void> saveUserCredentials(String email, String password) async {
@@ -70,29 +66,28 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) async {
     emit(const LoginLoading());
-    
-    final params = LoginParams(
-      email: event.email,
-      password: event.password,
-    );
-    
+
+    final params = LoginParams(email: event.email, password: event.password);
+
     final result = await _loginUseCase(params);
-    
+
     result.fold(
       (failure) {
         if (failure is InvalidAuthDataFailure) {
           emit(LoginFormValidationError(failure.errors));
         } else {
-          emit(LoginError(
-            message: failure.message,
-            statusCode: failure.statusCode,
-          ));
+          emit(
+            LoginError(
+              message: failure.message,
+              statusCode: failure.statusCode,
+            ),
+          );
         }
       },
       (authResponse) {
         _user = authResponse;
         emit(LoginLoaded(authResponse: authResponse));
-        
+
         // Save credentials if remember me is checked
         if (event.rememberMe) {
           saveUserCredentials(event.email, event.password);
@@ -106,12 +101,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) async {
     if (_user == null) return;
-    
+
     emit(const LogoutLoading());
-    
+
     final params = LogoutParams(token: _user!.accessToken);
     final result = await _logoutUseCase(params);
-    
+
     result.fold(
       (failure) {
         if (failure.statusCode == 500) {
@@ -120,10 +115,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           removeCredentials();
           emit(const LogoutLoaded(message: 'Logout successful'));
         } else {
-          emit(LogoutError(
-            message: failure.message,
-            statusCode: failure.statusCode,
-          ));
+          emit(
+            LogoutError(
+              message: failure.message,
+              statusCode: failure.statusCode,
+            ),
+          );
         }
       },
       (message) {
