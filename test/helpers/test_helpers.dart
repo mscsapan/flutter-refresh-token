@@ -4,8 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dartz/dartz.dart';
 
-import 'package:flutter_template/domain/entities/auth_response.dart';
-import 'package:flutter_template/domain/entities/user.dart';
+import 'package:bloc_clean_architecture/domain/entities/auth_response.dart';
+import 'package:bloc_clean_architecture/domain/entities/user.dart';
 
 /// Test data constants and helper objects
 class TestData {

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:flutter_template/core/utils/validators.dart';
+import 'package:bloc_clean_architecture/core/utils/validators.dart';
 
 void main() {
   group('Email Validator', () {
