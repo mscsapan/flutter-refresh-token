@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dartz/dartz.dart';
 
-import '../../lib/domain/entities/auth_response.dart';
-import '../../lib/domain/entities/user.dart';
+import 'package:flutter_template/domain/entities/auth_response.dart';
+import 'package:flutter_template/domain/entities/user.dart';
 
 /// Test data constants and helper objects
 class TestData {
@@ -17,8 +18,9 @@ class TestData {
     id: 1,
     name: 'Test User',
     email: testEmail,
-    phoneNumber: '+1234567890',
-    isVendor: 0,
+    phone: '+1234567890',
+    status: 0,
+    image: '',
   );
   
   static const testAuthResponse = AuthResponse(
@@ -34,8 +36,9 @@ class TestData {
     id: 2,
     name: 'Vendor User',
     email: 'vendor@example.com',
-    phoneNumber: '+1987654321',
-    isVendor: 1,
+    phone: '+1234567890',
+    status: 0,
+    image: '',
   );
   
   static const testVendorAuthResponse = AuthResponse(
@@ -51,13 +54,14 @@ class TestData {
     'access_token': testToken,
     'token_type': 'Bearer',
     'is_vendor': 0,
-    'expire_in': 3600,
+    'expires_in': 3600,
     'user': {
       'id': 1,
       'name': 'Test User',
       'email': testEmail,
-      'phone_number': '+1234567890',
-      'is_vendor': 0,
+      'phone': '+1234567890',
+      'image': '',
+      'status': 0,
     },
   };
   

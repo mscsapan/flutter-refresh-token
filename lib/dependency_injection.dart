@@ -47,15 +47,9 @@ class DInjector {
       ),
     ),
 
-    // Use cases
-    RepositoryProvider<LoginUseCase>(
-      create: (context) => LoginUseCase(context.read<AuthRepository>()),
-    ),
-    RepositoryProvider<LogoutUseCase>(
-      create: (context) => LogoutUseCase(context.read<AuthRepository>()),
-    ),
-    RepositoryProvider<GetExistingUserInfoUseCase>(
-      create: (context) => GetExistingUserInfoUseCase(context.read<AuthRepository>()),
+    // Combined Auth Use Cases
+    RepositoryProvider<AuthUseCases>(
+      create: (context) => AuthUseCases.create(context.read<AuthRepository>()),
     ),
     RepositoryProvider<GetSettingUseCase>(
       create: (context) => GetSettingUseCase(context.read<SettingRepository>()),
@@ -68,9 +62,7 @@ class DInjector {
     ),
     BlocProvider<LoginBloc>(
       create: (BuildContext context) => LoginBloc(
-        loginUseCase: context.read<LoginUseCase>(),
-        logoutUseCase: context.read<LogoutUseCase>(),
-        getExistingUserInfoUseCase: context.read<GetExistingUserInfoUseCase>(),
+        authUseCases: context.read<AuthUseCases>(),
       ),
     ),
     BlocProvider<SettingCubit>(

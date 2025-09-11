@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../presentation/exceptions/exception.dart';
+import '../../core/exceptions/exceptions.dart';
 import '../../presentation/utils/k_string.dart';
 import '../models/auth/user_response_model.dart';
 
@@ -14,6 +14,10 @@ abstract class LocalDataSource {
   UserResponseModel getExistingUserInfo();
 
   Future<bool> clearUserResponse();
+  
+  Future<void> saveCredentials({required String email, required String password});
+  
+  Future<void> removeCredentials();
 }
 
 class LocalDataSourceImpl implements LocalDataSource {
@@ -56,5 +60,17 @@ class LocalDataSourceImpl implements LocalDataSource {
   @override
   Future<bool> clearUserResponse() {
     return sharedPreferences.remove(KString.getExistingUserResponseKey);
+  }
+
+  @override
+  Future<void> saveCredentials({required String email, required String password}) async {
+    await sharedPreferences.setString('email', email);
+    await sharedPreferences.setString('password', password);
+  }
+
+  @override
+  Future<void> removeCredentials() async {
+    await sharedPreferences.remove('email');
+    await sharedPreferences.remove('password');
   }
 }

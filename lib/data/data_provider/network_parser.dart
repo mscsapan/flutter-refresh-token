@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 
 import '../../data/data_provider/remote_data_source.dart';
 import '../models/errors/errors_model.dart';
-import '../../presentation/exceptions/exception.dart';
+import '../../core/exceptions/exceptions.dart';
 
 class NetworkParser {
   static const _className = 'RemoteDataSourceImpl';

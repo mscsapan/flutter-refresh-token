@@ -39,7 +39,7 @@ class UserResponseModel extends Equatable {
       'token_type': tokenType,
       'is_vendor': isVendor,
       'expires_in': expireIn,
-      'user': user!.toMap(),
+      'user': user?.toMap(),
     };
   }
 
@@ -64,13 +64,13 @@ class UserResponseModel extends Equatable {
   bool get stringify => true;
 
   @override
-  List<Object> get props {
+  List<Object?> get props {
     return [
       accessToken,
       tokenType,
       isVendor,
       expireIn,
-      user!,
+      user,
     ];
   }
 }
