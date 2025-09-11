@@ -9,33 +9,33 @@ This Flutter template project implements Clean Architecture with the BLoC state 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    PRESENTATION LAYER                       │
-│  • UI (Screens, Widgets)                                   │
-│  • State Management (BLoC/Cubit)                           │
+│  • UI (Screens, Widgets)                                    │
+│  • State Management (BLoC/Cubit)                            │
 │  • Routes & Navigation                                      │
 └─────────────────────────────────────────────────────────────┘
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                      DOMAIN LAYER                          │
-│  • Entities (Business Objects)                             │
-│  • Use Cases (Business Rules)                              │
-│  • Repository Interfaces                                   │
+│                      DOMAIN LAYER                           │
+│  • Entities (Business Objects)                              │
+│  • Use Cases (Business Rules)                               │
+│  • Repository Interfaces                                    │
 └─────────────────────────────────────────────────────────────┘
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                       DATA LAYER                           │
-│  • Repository Implementations                              │
-│  • Data Sources (Remote/Local)                             │
-│  • Models & Mappers                                        │
+│                       DATA LAYER                            │
+│  • Repository Implementations                               │
+│  • Data Sources (Remote/Local)                              │
+│  • Models & Mappers                                         │
 └─────────────────────────────────────────────────────────────┘
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                       CORE LAYER                           │
-│  • Base Classes                                            │
-│  • Failures & Exceptions                                   │
-│  • Utilities                                               │
+│                       CORE LAYER                            │
+│  • Base Classes                                             │
+│  • Failures & Exceptions                                    │
+│  • Utilities                                                │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -184,115 +184,115 @@ Here's the detailed step-by-step flow showing exactly which functions are called
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                           USER INTERACTION                         │
+│                           USER INTERACTION                          │
 └─────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  1. UI LAYER (Presentation)                                        │
-│     📄 File: lib/presentation/screens/authentication/login_screen.dart│
-│     🔧 Function: User taps login button                            │
-│     📤 Action: context.read<LoginBloc>().add(LoginEventSubmit())    │
-└─────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│  1. UI LAYER (Presentation)                                            │
+│     📄 File: lib/presentation/screens/authentication/login_screen.dart │
+│     🔧 Function: User taps login button                                │
+│     📤 Action: context.read<LoginBloc>().add(LoginEventSubmit())       │
+└────────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  2. BLOC LAYER (State Management)                                  │
-│     📄 File: lib/presentation/bloc/auth/login_bloc.dart            │
-│     🔧 Function: _onLoginSubmit()  [Line 68-102]                   │
+│  2. BLOC LAYER (State Management)                                   │
+│     📄 File: lib/presentation/bloc/auth/login_bloc.dart             │
+│     🔧 Function: _onLoginSubmit()  [Line 68-102]                    │
 │     📤 Actions:                                                     │
 │        • emit(LoginLoading())                                       │
-│        • Create LoginParams(email, password)                       │
-│        • Call: await _loginUseCase(params)                         │
+│        • Create LoginParams(email, password)                        │
+│        • Call: await _loginUseCase(params)                          │
 └─────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  3. USE CASE LAYER (Business Logic)                                │
-│     📄 File: lib/domain/usecases/auth/login_usecase.dart           │
-│     🔧 Function: call()  [Line 15-20]                              │
-│     📤 Action: return repository.login(email, password)            │
+│  3. USE CASE LAYER (Business Logic)                                 │
+│     📄 File: lib/domain/usecases/auth/login_usecase.dart            │
+│     🔧 Function: call()  [Line 15-20]                               │
+│     📤 Action: return repository.login(email, password)             │
 └─────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  4. REPOSITORY IMPLEMENTATION (Data Orchestration)                 │
-│     📄 File: lib/data/repositories/auth_repository_impl.dart       │
-│     🔧 Function: login()  [Line 22-38]                             │
+│  4. REPOSITORY IMPLEMENTATION (Data Orchestration)                  │
+│     📄 File: lib/data/repositories/auth_repository_impl.dart        │
+│     🔧 Function: login()  [Line 22-38]                              │
 │     📤 Actions:                                                     │
-│        • Create LoginStateModel(email, password)                   │
-│        • Call: remoteDataSources.login(loginModel)                 │
-│        • Call: localDataSources.cacheUserResponse(result)          │
-│        • Return: Right(result.toDomain())  [mapper conversion]     │
+│        • Create LoginStateModel(email, password)                    │
+│        • Call: remoteDataSources.login(loginModel)                  │
+│        • Call: localDataSources.cacheUserResponse(result)           │
+│        • Return: Right(result.toDomain())  [mapper conversion]      │
 └─────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  5. REMOTE DATA SOURCE (API Layer)                                 │
-│     📄 File: lib/data/data_provider/remote_data_source.dart        │
-│     🔧 Function: login()  [Line 34-40]                             │
+│  5. REMOTE DATA SOURCE (API Layer)                                  │
+│     📄 File: lib/data/data_provider/remote_data_source.dart         │
+│     🔧 Function: login()  [Line 34-40]                              │
 │     📤 Actions:                                                     │
-│        • Uri.parse(RemoteUrls.login)                               │
-│        • client.post(uri, body: body.toMap(), headers: headers)    │
-│        • NetworkParser.callClientWithCatchException()              │
+│        • Uri.parse(RemoteUrls.login)                                │
+│        • client.post(uri, body: body.toMap(), headers: headers)     │
+│        • NetworkParser.callClientWithCatchException()               │
 └─────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  6. NETWORK PARSER (HTTP Response Handling)                        │
-│     📄 File: lib/data/data_provider/network_parser.dart            │
-│     🔧 Function: callClientWithCatchException()  [Line 16-37]      │
-│     🔧 Function: _responseParser()  [Line 39-85]                   │
+│  6. NETWORK PARSER (HTTP Response Handling)                         │
+│     📄 File: lib/data/data_provider/network_parser.dart             │
+│     🔧 Function: callClientWithCatchException()  [Line 16-37]       │
+│     🔧 Function: _responseParser()  [Line 39-85]                    │
 │     📤 Actions:                                                     │
-│        • Handle HTTP status codes (200, 400, 401, 422, 500, etc.) │
-│        • Parse JSON response or throw specific exceptions          │
-│        • Return parsed response data                               │
+│        • Handle HTTP status codes (200, 400, 401, 422, 500, etc.)   │
+│        • Parse JSON response or throw specific exceptions           │
+│        • Return parsed response data                                │
 └─────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  🌐 EXTERNAL API SERVER                                            │
-│     🔧 Processes HTTP POST request                                 │
-│     📤 Returns JSON response with user data or error               │
+│  🌐 EXTERNAL API SERVER                                             │
+│     🔧 Processes HTTP POST request                                  │
+│     📤 Returns JSON response with user data or error                │
 └─────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  7. RESPONSE PROCESSING (Data Transformation)                      │
-│     📄 File: lib/data/mappers/auth_mappers.dart                    │
-│     🔧 Function: toDomain()  [Line 19-27]                          │
+│  7. RESPONSE PROCESSING (Data Transformation)                       │
+│     📄 File: lib/data/mappers/auth_mappers.dart                     │
+│     🔧 Function: toDomain()  [Line 19-27]                           │
 │     📤 Actions:                                                     │
-│        • Convert UserResponseModel → AuthResponse (domain entity)  │
-│        • Convert nested UserResponse → User (domain entity)        │
+│        • Convert UserResponseModel → AuthResponse (domain entity)   │
+│        • Convert nested UserResponse → User (domain entity)         │
 └─────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  8. LOCAL STORAGE (Cache Management)                               │
-│     📄 File: lib/data/data_provider/local_data_source.dart         │
-│     🔧 Function: cacheUserResponse()  [Line 40-43]                 │
+│  8. LOCAL STORAGE (Cache Management)                                │
+│     📄 File: lib/data/data_provider/local_data_source.dart          │
+│     🔧 Function: cacheUserResponse()  [Line 40-43]                  │
 │     📤 Action: sharedPreferences.setString(key, userModel.toJson()) │
 └─────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  9. BLOC STATE EMISSION (UI Update)                                │
-│     📄 File: lib/presentation/bloc/auth/login_bloc.dart            │
-│     🔧 Function: _onLoginSubmit()  [Line 92-94]                    │
+│  9. BLOC STATE EMISSION (UI Update)                                 │
+│     📄 File: lib/presentation/bloc/auth/login_bloc.dart             │
+│     🔧 Function: _onLoginSubmit()  [Line 92-94]                     │
 │     📤 Actions:                                                     │
 │        • _user = authResponse                                       │
-│        • emit(LoginLoaded(authResponse: authResponse))             │
+│        • emit(LoginLoaded(authResponse: authResponse))              │
 └─────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  10. UI UPDATE (Screen Rebuild)                                    │
-│     📄 File: lib/presentation/screens/authentication/login_screen.dart│
-│     🔧 Function: BlocListener/BlocBuilder rebuilds                 │
-│     📤 Actions:                                                     │
-│        • Hide loading indicator                                     │
-│        • Navigate to main screen or show error message             │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│  10. UI UPDATE (Screen Rebuild)                                         │
+│     📄 File: lib/presentation/screens/authentication/login_screen.dart  │
+│     🔧 Function: BlocListener/BlocBuilder rebuilds                      │
+│     📤 Actions:                                                         │
+│        • Hide loading indicator                                         │
+│        • Navigate to main screen or show error message                  │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 🔄 Error Handling Flow
