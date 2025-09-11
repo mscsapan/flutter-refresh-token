@@ -43,6 +43,14 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
+  
+  # Testing packages
+  mockito: ^5.4.2                   # Mock objects for testing
+  build_runner: ^2.4.6              # Code generation runner
+  bloc_test: ^10.0.0                # Testing utilities for BLoC (compatible version)
+  mocktail: ^1.0.0                  # Alternative mocking library
 
   flutter_lints: ^6.0.0             # Recommended linting rules
   flutter_launcher_icons: ^0.14.4   # Generate app launcher icons for iOS/Android

@@ -439,10 +439,559 @@ BlocProvider<ProductBloc>(
 
 ## 🧪 Testing Strategy
 
-- **Unit Tests**: Test use cases, entities, and mappers in isolation
-- **Widget Tests**: Test UI components with mocked BLoCs
-- **Integration Tests**: Test complete feature flows
-- **Repository Tests**: Test data layer with mocked data sources
+This project implements a comprehensive testing strategy that covers all layers of Clean Architecture. Each layer can be tested independently, ensuring robust and reliable code.
+
+### 📋 Testing Pyramid Overview
+
+```
+                    🔺 E2E Tests (Few)
+                  Integration Tests (Some)  
+                Widget Tests (More)
+              Unit Tests (Many)
+```
+
+### 🎯 Testing Approaches by Layer
+
+#### 1. **Unit Tests** - Domain & Data Layer Testing
+
+**Purpose**: Test business logic, use cases, repositories, and mappers in isolation.
+
+**What to Test**:
+- ✅ Use Cases (Business Logic)
+- ✅ Entities (Value Objects)
+- ✅ Repository Implementations
+- ✅ Data Sources
+- ✅ Mappers (Data ↔ Domain conversion)
+- ✅ Validators & Utilities
+
+**Example Structure**:
+```
+test/
+├── unit/
+│   ├── domain/
+│   │   ├── usecases/
+│   │   │   ├── auth/
+│   │   │   │   ├── login_usecase_test.dart
+│   │   │   │   ├── logout_usecase_test.dart
+│   │   │   │   └── get_existing_user_info_usecase_test.dart
+│   │   │   └── setting/
+│   │   │       └── get_setting_usecase_test.dart
+│   │   └── entities/
+│   │       ├── user_test.dart
+│   │       └── auth_response_test.dart
+│   ├── data/
+│   │   ├── repositories/
+│   │   │   ├── auth_repository_impl_test.dart
+│   │   │   └── setting_repository_impl_test.dart
+│   │   ├── data_provider/
+│   │   │   ├── remote_data_source_test.dart
+│   │   │   └── local_data_source_test.dart
+│   │   └── mappers/
+│   │       └── auth_mappers_test.dart
+│   └── core/
+│       ├── utils/
+│       │   ├── validators_test.dart
+│       │   └── logger_test.dart
+│       └── services/
+│           └── navigation_service_test.dart
+```
+
+#### 2. **Widget Tests** - Presentation Layer Testing
+
+**Purpose**: Test UI components and their interaction with BLoCs/Cubits.
+
+**What to Test**:
+- ✅ Individual Widgets
+- ✅ Screen Widgets
+- ✅ BLoC/Cubit State Changes
+- ✅ User Interactions
+- ✅ Navigation Flows
+
+**Example Structure**:
+```
+test/
+├── widget/
+│   ├── presentation/
+│   │   ├── bloc/
+│   │   │   ├── auth/
+│   │   │   │   └── login_bloc_test.dart
+│   │   │   └── internet_status/
+│   │   │       └── internet_status_bloc_test.dart
+│   │   ├── screens/
+│   │   │   ├── authentication/
+│   │   │   │   └── login_screen_test.dart
+│   │   │   └── splash/
+│   │   │       └── splash_screen_test.dart
+│   │   └── widgets/
+│   │       ├── custom_button_test.dart
+│   │       └── loading_widget_test.dart
+```
+
+#### 3. **Integration Tests** - Feature Flow Testing
+
+**Purpose**: Test complete user journeys and feature flows.
+
+**What to Test**:
+- ✅ End-to-end user workflows
+- ✅ Multiple screen interactions
+- ✅ Real API integration (with test environment)
+- ✅ Authentication flows
+- ✅ Data persistence
+
+**Example Structure**:
+```
+integration_test/
+├── flows/
+│   ├── authentication_flow_test.dart
+│   ├── onboarding_flow_test.dart
+│   └── settings_flow_test.dart
+└── helpers/
+    ├── test_helpers.dart
+    └── mock_data.dart
+```
+
+### 🛠️ Testing Setup & Tools
+
+#### **Dependencies for Testing**
+Add these to your `pubspec.yaml`:
+
+```yaml
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.4.2
+  build_runner: ^2.4.6
+  bloc_test: ^9.1.4
+  mocktail: ^1.0.0
+  integration_test:
+    sdk: flutter
+```
+
+### 📝 Testing Implementation Examples
+
+#### **1. Unit Test - Use Case Example**
+
+```dart
+// test/unit/domain/usecases/auth/login_usecase_test.dart
+import 'package:dartz/dartz.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+import 'package:your_app/core/error/failures.dart';
+import 'package:your_app/domain/entities/auth_response.dart';
+import 'package:your_app/domain/repositories/auth_repository.dart';
+import 'package:your_app/domain/usecases/auth/login_usecase.dart';
+
+@GenerateNiceMocks([MockSpec<AuthRepository>()])
+import 'login_usecase_test.mocks.dart';
+
+void main() {
+  late LoginUseCase usecase;
+  late MockAuthRepository mockRepository;
+
+  setUp(() {
+    mockRepository = MockAuthRepository();
+    usecase = LoginUseCase(mockRepository);
+  });
+
+  const testEmail = 'test@example.com';
+  const testPassword = 'password123';
+  const testAuthResponse = AuthResponse(
+    accessToken: 'token123',
+    tokenType: 'Bearer',
+    isVendor: 0,
+    expireIn: 3600,
+  );
+
+  group('LoginUseCase', () {
+    test('should return AuthResponse when login is successful', () async {
+      // Arrange
+      when(mockRepository.login(
+        email: anyNamed('email'),
+        password: anyNamed('password'),
+      )).thenAnswer((_) async => const Right(testAuthResponse));
+
+      // Act
+      final result = await usecase(const LoginParams(
+        email: testEmail,
+        password: testPassword,
+      ));
+
+      // Assert
+      expect(result, const Right(testAuthResponse));
+      verify(mockRepository.login(
+        email: testEmail,
+        password: testPassword,
+      )).called(1);
+    });
+
+    test('should return ServerFailure when login fails', () async {
+      // Arrange
+      when(mockRepository.login(
+        email: anyNamed('email'),
+        password: anyNamed('password'),
+      )).thenAnswer((_) async => const Left(ServerFailure('Login failed', 401)));
+
+      // Act
+      final result = await usecase(const LoginParams(
+        email: testEmail,
+        password: testPassword,
+      ));
+
+      // Assert
+      expect(result, const Left(ServerFailure('Login failed', 401)));
+    });
+  });
+}
+```
+
+#### **2. Widget Test - BLoC Testing Example**
+
+```dart
+// test/widget/presentation/bloc/auth/login_bloc_test.dart
+import 'package:bloc_test/bloc_test.dart';
+import 'package:dartz/dartz.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+import 'package:your_app/core/error/failures.dart';
+import 'package:your_app/domain/entities/auth_response.dart';
+import 'package:your_app/domain/usecases/auth/login_usecase.dart';
+import 'package:your_app/presentation/bloc/auth/login_bloc.dart';
+
+@GenerateNiceMocks([MockSpec<LoginUseCase>()])
+import 'login_bloc_test.mocks.dart';
+
+void main() {
+  late LoginBloc loginBloc;
+  late MockLoginUseCase mockLoginUseCase;
+  late MockLogoutUseCase mockLogoutUseCase;
+  late MockGetExistingUserInfoUseCase mockGetExistingUserInfoUseCase;
+
+  setUp(() {
+    mockLoginUseCase = MockLoginUseCase();
+    mockLogoutUseCase = MockLogoutUseCase();
+    mockGetExistingUserInfoUseCase = MockGetExistingUserInfoUseCase();
+    
+    loginBloc = LoginBloc(
+      loginUseCase: mockLoginUseCase,
+      logoutUseCase: mockLogoutUseCase,
+      getExistingUserInfoUseCase: mockGetExistingUserInfoUseCase,
+    );
+  });
+
+  tearDown(() {
+    loginBloc.close();
+  });
+
+  const testAuthResponse = AuthResponse(
+    accessToken: 'token123',
+    tokenType: 'Bearer',
+    isVendor: 0,
+    expireIn: 3600,
+  );
+
+  group('LoginBloc', () {
+    blocTest<LoginBloc, LoginState>(
+      'emits [LoginLoading, LoginLoaded] when login is successful',
+      build: () {
+        when(mockLoginUseCase(any))
+            .thenAnswer((_) async => const Right(testAuthResponse));
+        return loginBloc;
+      },
+      act: (bloc) => bloc.add(const LoginEventSubmit(
+        email: 'test@example.com',
+        password: 'password123',
+        rememberMe: false,
+      )),
+      expect: () => [
+        const LoginLoading(),
+        const LoginLoaded(authResponse: testAuthResponse),
+      ],
+    );
+
+    blocTest<LoginBloc, LoginState>(
+      'emits [LoginLoading, LoginError] when login fails',
+      build: () {
+        when(mockLoginUseCase(any))
+            .thenAnswer((_) async => const Left(ServerFailure('Login failed', 401)));
+        return loginBloc;
+      },
+      act: (bloc) => bloc.add(const LoginEventSubmit(
+        email: 'test@example.com',
+        password: 'wrong_password',
+        rememberMe: false,
+      )),
+      expect: () => [
+        const LoginLoading(),
+        const LoginError(message: 'Login failed', statusCode: 401),
+      ],
+    );
+  });
+}
+```
+
+#### **3. Widget Test - Screen Testing Example**
+
+```dart
+// test/widget/presentation/screens/authentication/login_screen_test.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+
+import 'package:your_app/presentation/bloc/auth/login_bloc.dart';
+import 'package:your_app/presentation/screens/authentication/login_screen.dart';
+
+class MockLoginBloc extends Mock implements LoginBloc {}
+
+void main() {
+  late MockLoginBloc mockLoginBloc;
+
+  setUp(() {
+    mockLoginBloc = MockLoginBloc();
+  });
+
+  Widget createWidgetUnderTest() {
+    return MaterialApp(
+      home: BlocProvider<LoginBloc>(
+        create: (_) => mockLoginBloc,
+        child: const LoginScreen(),
+      ),
+    );
+  }
+
+  group('LoginScreen', () {
+    testWidgets('displays email and password fields', (WidgetTester tester) async {
+      // Arrange
+      when(mockLoginBloc.state).thenReturn(const LoginInitial());
+      when(mockLoginBloc.stream).thenAnswer((_) => const Stream.empty());
+
+      // Act
+      await tester.pumpWidget(createWidgetUnderTest());
+
+      // Assert
+      expect(find.byKey(const ValueKey('email_field')), findsOneWidget);
+      expect(find.byKey(const ValueKey('password_field')), findsOneWidget);
+      expect(find.byKey(const ValueKey('login_button')), findsOneWidget);
+    });
+
+    testWidgets('triggers login event when login button is pressed',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockLoginBloc.state).thenReturn(const LoginInitial());
+      when(mockLoginBloc.stream).thenAnswer((_) => const Stream.empty());
+
+      await tester.pumpWidget(createWidgetUnderTest());
+
+      // Act
+      await tester.enterText(
+          find.byKey(const ValueKey('email_field')), 'test@example.com');
+      await tester.enterText(
+          find.byKey(const ValueKey('password_field')), 'password123');
+      await tester.tap(find.byKey(const ValueKey('login_button')));
+      await tester.pump();
+
+      // Assert
+      verify(mockLoginBloc.add(const LoginEventSubmit(
+        email: 'test@example.com',
+        password: 'password123',
+        rememberMe: false,
+      ))).called(1);
+    });
+  });
+}
+```
+
+#### **4. Integration Test Example**
+
+```dart
+// integration_test/flows/authentication_flow_test.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+
+import 'package:your_app/main.dart' as app;
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  group('Authentication Flow', () {
+    testWidgets('complete login flow', (WidgetTester tester) async {
+      // Start the app
+      app.main();
+      await tester.pumpAndSettle();
+
+      // Navigate to login screen
+      await tester.tap(find.byKey(const ValueKey('login_button')));
+      await tester.pumpAndSettle();
+
+      // Enter credentials
+      await tester.enterText(
+          find.byKey(const ValueKey('email_field')), 'test@example.com');
+      await tester.enterText(
+          find.byKey(const ValueKey('password_field')), 'password123');
+
+      // Submit login
+      await tester.tap(find.byKey(const ValueKey('submit_button')));
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      // Verify successful login
+      expect(find.byKey(const ValueKey('main_screen')), findsOneWidget);
+    });
+
+    testWidgets('login with invalid credentials shows error',
+        (WidgetTester tester) async {
+      app.main();
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('login_button')));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+          find.byKey(const ValueKey('email_field')), 'invalid@example.com');
+      await tester.enterText(
+          find.byKey(const ValueKey('password_field')), 'wrongpassword');
+
+      await tester.tap(find.byKey(const ValueKey('submit_button')));
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      expect(find.text('Invalid credentials'), findsOneWidget);
+    });
+  });
+}
+```
+
+### 🚀 Running Tests
+
+#### **Generate Mocks**
+```bash
+flutter packages pub run build_runner build
+```
+
+#### **Run All Tests**
+```bash
+flutter test
+```
+
+#### **Run Specific Test Categories**
+```bash
+# Unit tests only
+flutter test test/unit/
+
+# Widget tests only
+flutter test test/widget/
+
+# Integration tests
+flutter test integration_test/
+```
+
+#### **Run Tests with Coverage**
+```bash
+flutter test --coverage
+genhtml coverage/lcov.info -o coverage/html
+open coverage/html/index.html
+```
+
+#### **Watch Mode for Development**
+```bash
+flutter test --watch
+```
+
+### 📊 Test Coverage Goals
+
+| Layer | Target Coverage | Focus Area |
+|-------|----------------|------------|
+| **Domain** | 90-100% | Use Cases, Entities |
+| **Data** | 80-90% | Repositories, Data Sources, Mappers |
+| **Presentation** | 70-80% | BLoCs, Critical UI Components |
+| **Core** | 90-100% | Utilities, Services, Validators |
+
+### 🎯 Testing Best Practices
+
+#### **DO's** ✅
+- Test business logic thoroughly in domain layer
+- Mock external dependencies (APIs, databases)
+- Use descriptive test names that explain the scenario
+- Follow AAA pattern (Arrange, Act, Assert)
+- Test both success and failure scenarios
+- Use `setUp()` and `tearDown()` for test preparation
+- Group related tests with `group()`
+
+#### **DON'Ts** ❌
+- Don't test Flutter framework code
+- Don't test third-party packages
+- Don't write tests that depend on network connectivity
+- Don't test implementation details, test behavior
+- Don't ignore test failures
+
+### 🔧 Mock Data & Test Helpers
+
+```dart
+// test/helpers/test_data.dart
+class TestData {
+  static const testUser = User(
+    id: 1,
+    name: 'Test User',
+    email: 'test@example.com',
+    phoneNumber: '+1234567890',
+    isVendor: 0,
+  );
+
+  static const testAuthResponse = AuthResponse(
+    accessToken: 'test_token',
+    tokenType: 'Bearer',
+    isVendor: 0,
+    expireIn: 3600,
+    user: testUser,
+  );
+}
+
+// test/helpers/widget_test_helpers.dart
+class WidgetTestHelpers {
+  static Widget wrapWithMaterialApp(Widget child) {
+    return MaterialApp(home: Scaffold(body: child));
+  }
+
+  static Widget wrapWithBloc<B extends StateStreamableSource<Object?>>(
+    B bloc,
+    Widget child,
+  ) {
+    return BlocProvider<B>.value(
+      value: bloc,
+      child: wrapWithMaterialApp(child),
+    );
+  }
+}
+```
+
+### 📈 Continuous Integration
+
+Add this to your CI/CD pipeline (e.g., GitHub Actions):
+
+```yaml
+# .github/workflows/test.yml
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.13.0'
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test --coverage
+      - run: flutter test integration_test/
+```
+
+This testing strategy ensures your Clean Architecture Flutter project is robust, maintainable, and bug-free! 🧪✨
 
 ## 📦 Dependencies
 

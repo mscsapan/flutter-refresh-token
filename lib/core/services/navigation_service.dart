@@ -39,7 +39,7 @@ class NavigationService {
   }
   
   // Dialog navigation
-  static Future<T?> showDialog<T>({
+  static Future<T?> showDialogRoute<T>({
     required Widget dialog,
     bool barrierDismissible = true,
   }) {
@@ -47,12 +47,12 @@ class NavigationService {
     return showDialog<T>(
       context: context!,
       barrierDismissible: barrierDismissible,
-      builder: (context) => dialog,
+      builder: (BuildContext context) => dialog,
     );
   }
   
   // Bottom sheet navigation
-  static Future<T?> showBottomSheet<T>({
+  static Future<T?> showBottomSheetRoute<T>({
     required Widget bottomSheet,
     bool isScrollControlled = false,
   }) {
