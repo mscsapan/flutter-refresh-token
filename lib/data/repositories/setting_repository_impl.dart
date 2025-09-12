@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 
-import '../../core/error/failures.dart';
+import '../../core/failures/failures.dart';
 import '../../domain/repositories/setting_repository.dart';
 import '../../core/exceptions/exceptions.dart';
 import '../data_provider/local_data_source.dart';

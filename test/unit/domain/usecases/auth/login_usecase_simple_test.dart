@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:bloc_clean_architecture/core/error/failures.dart';
+import 'package:bloc_clean_architecture/core/failures/failures.dart';
 import 'package:bloc_clean_architecture/domain/entities/auth_response.dart';
 import 'package:bloc_clean_architecture/domain/entities/user.dart';
 import 'package:bloc_clean_architecture/domain/repositories/auth_repository.dart';

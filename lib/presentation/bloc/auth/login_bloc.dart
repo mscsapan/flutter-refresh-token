@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/error/failures.dart';
+import '../../../core/failures/failures.dart';
 import '../../../core/usecases/usecase.dart';
 import '../../../domain/entities/auth_response.dart';
 import '../../../domain/usecases/auth/auth_usecases.dart';

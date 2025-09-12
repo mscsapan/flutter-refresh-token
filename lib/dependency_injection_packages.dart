@@ -1,5 +1,5 @@
 // Clean Architecture imports
-export 'core/error/failures.dart';
+export 'core/failures/failures.dart';
 export 'core/usecases/usecase.dart';
 
 // Domain layer exports
