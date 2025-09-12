@@ -30,7 +30,7 @@ class _StartUpContainerState extends State<StartUpContainer> {
     super.didChangeDependencies();
   }
 
-  _initialize() async {
+  Future<void> _initialize() async {
     if (!_isInit) {
       final duration = widget.delayInitDuration ?? 200;
       if (duration > 0) {

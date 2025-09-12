@@ -1,10 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../utils/constraints.dart';
-import '../../../utils/utils.dart';
 import 'main_controller.dart';
 
 class MyBottomNavigationBar extends StatelessWidget {
@@ -74,6 +72,6 @@ class MyBottomNavigationBar extends StatelessWidget {
     );
   }
 
-  Widget _navIcon(String path) => Padding(
-      padding: Utils.symmetric(v: 8.0, h: 0.0), child: SvgPicture.asset(path));
+  // Widget _navIcon(String path) => Padding(
+  //     padding: Utils.symmetric(v: 8.0, h: 0.0), child: SvgPicture.asset(path));
 }

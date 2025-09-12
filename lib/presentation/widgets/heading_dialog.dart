@@ -38,7 +38,7 @@ class DialogHeading extends StatelessWidget {
                 //padding: Utils.only(bottom: 10.0),
                 decoration: BoxDecoration(
                   borderRadius: Utils.borderRadius(r: 8.0),
-                  border: Border.all(color: grayColor.withOpacity(0.5)),
+                  border: Border.all(color: grayColor.withValues(alpha:0.5)),
                 ),
                 child: const Icon(Icons.clear),
               ),
@@ -47,7 +47,7 @@ class DialogHeading extends StatelessWidget {
         ),
         Container(
           height: 1.0,
-          color: grayColor.withOpacity(0.2),
+          color: grayColor.withValues(alpha:0.2),
           margin: Utils.symmetric(h: 0.0, v: 12.0),
         ),
       ],

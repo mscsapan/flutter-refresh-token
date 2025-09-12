@@ -9,7 +9,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 import '../bloc/auth/login_bloc.dart';
-import '../cubit/setting/setting_cubit.dart';
 import '../routes/route_names.dart';
 import '../widgets/custom_text.dart';
 import 'constraints.dart';
@@ -131,7 +130,7 @@ class Utils {
   }*/
 
   static String formatAmount(BuildContext context, var price, [int radix = 1]) {
-    final sCubit = context.read<SettingCubit>();
+    // final sCubit = context.read<SettingCubit>();
     // if (cCubit.state.currencies.isNotEmpty) {
     //   return Utils.convertCurrency(price, context, cCubit.state.currencies.first, radix);
     // } else {
@@ -298,7 +297,7 @@ class Utils {
     }
   }
 
-  static String formatDate(var date) {
+  static String formatDate(dynamic date) {
     late DateTime dateTime;
     if (date is String) {
       dateTime = DateTime.parse(date);
@@ -310,7 +309,7 @@ class Utils {
     return DateFormat.yMMMMd().format(dateTime.toLocal());
   }
 
-  static String timeAgo(var date) {
+  static String timeAgo(dynamic date) {
     late DateTime dateTime;
     if (date is String) {
       dateTime = DateTime.now();
@@ -336,7 +335,7 @@ class Utils {
           //print('list-tag $tags');
         }
       } catch (e) {
-        print('Error decoding JSON: $e');
+        debugPrint('Error decoding JSON: $e');
       }
     }
 

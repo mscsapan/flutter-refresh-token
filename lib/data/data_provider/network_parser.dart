@@ -37,7 +37,7 @@ class NetworkParser {
     }
   }
 
-  static _responseParser(http.Response response) {
+  static dynamic _responseParser(http.Response response) {
     switch (response.statusCode) {
       case 200:
         var responseJson = json.decode(response.body);
@@ -87,7 +87,7 @@ class NetworkParser {
     }
   }
 
-  static parsingError(String body) {
+  static dynamic parsingError(String body) {
     final errorsMap = json.decode(body);
     try {
       if (errorsMap['errors'] != null) {

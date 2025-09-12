@@ -29,7 +29,7 @@ dependencies:
   http: ^1.5.0                      # Make HTTP requests (REST APIs)
   shared_preferences: ^2.5.3        # Store key-value pairs locally (lightweight persistent storage)
   intl: ^0.20.2                     # Internationalization & date formatting
-  connectivity_plus: ^6.1.5         # Check network connectivity status
+  connectivity_plus: ^7.0.0         # Check network connectivity status
 
   # ---------- Optional/Commented Packages ----------
   # file_picker: ^10.3.2             # Pick files from device storage

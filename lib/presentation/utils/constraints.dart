@@ -4,7 +4,7 @@ const primaryColor = Color(0xFF6610F2);
 const secondaryColor = Color(0xFFFE9900);
 const blackColor = Color(0xFF061533);
 const grayColor = Color(0xFF535769);
-Color hintTextColor = const Color(0xFF000000).withOpacity(0.2);
+Color hintTextColor = const Color(0xFF000000).withValues(alpha:0.2);
 
 const greenColor = Color(0xFF22C55E);
 const blueColor = Color(0xFF3266CC);

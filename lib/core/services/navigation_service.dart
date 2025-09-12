@@ -8,19 +8,19 @@ class NavigationService {
   static BuildContext? get context => navigatorKey.currentContext;
   
   // Basic navigation
-  static Future<T?> navigateTo<T>(String routeName, {Object? arguments}) {
+  static Future<T?> navigateTo<T>(String routeName, {Object? arguments}) async {
     Logger.navigation('Navigating to: $routeName');
-    return navigator!.pushNamed<T>(routeName, arguments: arguments);
+    return navigator?.pushNamed<T>(routeName, arguments: arguments);
   }
   
-  static Future<T?> navigateToAndReplace<T>(String routeName, {Object? arguments}) {
+  static Future<T?> navigateToAndReplace<T>(String routeName, {Object? arguments}) async {
     Logger.navigation('Navigate and replace to: $routeName');
-    return navigator!.pushReplacementNamed<T, Object?>(routeName, arguments: arguments);
+    return navigator?.pushReplacementNamed<T, Object?>(routeName, arguments: arguments);
   }
   
-  static Future<T?> navigateToAndClearStack<T>(String routeName, {Object? arguments}) {
+  static Future<T?> navigateToAndClearStack<T>(String routeName, {Object? arguments}) async {
     Logger.navigation('Navigate and clear stack to: $routeName');
-    return navigator!.pushNamedAndRemoveUntil<T>(
+    return navigator?.pushNamedAndRemoveUntil<T>(
       routeName,
       (route) => false,
       arguments: arguments,
@@ -30,7 +30,7 @@ class NavigationService {
   static void goBack<T>([T? result]) {
     Logger.navigation('Going back');
     if (canGoBack()) {
-      navigator!.pop<T>(result);
+      navigator?.pop<T>(result);
     }
   }
   

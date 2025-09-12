@@ -50,7 +50,7 @@ class BackButtonWidget extends StatelessWidget {
         margin: Utils.only(right: 30.0),
         decoration: BoxDecoration(
           borderRadius: Utils.borderRadius(),
-          border: Border.all(color: grayColor.withOpacity(0.5)),
+          border: Border.all(color: grayColor.withValues(alpha:0.5)),
         ),
         child: Padding(
           padding: Utils.only(left: 8.0),
