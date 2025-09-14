@@ -7,6 +7,11 @@ abstract class UseCase<Type, Params> {
   Future<Either<Failure, Type>> call(Params params);
 }
 
+// UseCase with optional parameters
+abstract class OptionalParamUseCase<Type, Params> {
+  Future<Either<Failure, Type>> call([Params? params]);
+}
+
 abstract class SyncUseCase<Type, Params> {
   Either<Failure, Type> call(Params params);
 }
