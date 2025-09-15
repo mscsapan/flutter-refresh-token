@@ -1,0 +1,9 @@
+❓ Which layer to start from?
+
+Always start from Domain layer (center):
+1. Domain - Entities, repositories, use cases
+2. Data - Models, mappers, repository implementations
+3. Presentation - Cubit, screens
+
+
+
