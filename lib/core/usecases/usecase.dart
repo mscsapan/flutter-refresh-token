@@ -3,17 +3,22 @@ import 'package:equatable/equatable.dart';
 
 import '../failures/failures.dart';
 
-abstract class UseCase<Type, Params> {
-  Future<Either<Failure, Type>> call(Params params);
+/// Base contract for all async use cases.
+///
+/// [Output] — the domain object returned on success.
+/// [Params] — the input parameter object (use [NoParams] when none needed).
+abstract class UseCase<Output, Params> {
+  Future<Either<Failure, Output>> call(Params params);
 }
 
-// UseCase with optional parameters
-abstract class OptionalParamUseCase<Type, Params> {
-  Future<Either<Failure, Type>> call([Params? params]);
+/// Use case that accepts an optional parameter.
+abstract class OptionalParamUseCase<Output, Params> {
+  Future<Either<Failure, Output>> call([Params? params]);
 }
 
-abstract class SyncUseCase<Type, Params> {
-  Either<Failure, Type> call(Params params);
+/// Use case that executes synchronously (no async I/O, e.g. reading from cache).
+abstract class SyncUseCase<Output, Params> {
+  Either<Failure, Output> call(Params params);
 }
 
 class NoParams extends Equatable {

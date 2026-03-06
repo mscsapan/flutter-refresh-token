@@ -26,8 +26,10 @@ dependencies:
 
   # ---------- Data & APIs ----------
   dartz: ^0.10.1                    # Functional programming tools (Either, Option, etc.)
-  http: ^1.6.0                      # Make HTTP requests (REST APIs)
+  dio: ^5.8.0+1                     # Powerful HTTP client with interceptors, timeouts & advanced features
+  pretty_dio_logger: ^1.4.0         # Pretty-print Dio request/response logs for debugging
   shared_preferences: ^2.5.4        # Store key-value pairs locally (lightweight persistent storage)
+  flutter_secure_storage: ^9.2.4    # Store sensitive data (tokens, passwords) in encrypted storage
   intl: ^0.20.2                     # Internationalization & date formatting
   connectivity_plus: ^7.0.0         # Check network connectivity status
 

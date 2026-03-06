@@ -11,6 +11,7 @@ export 'domain/usecases/auth/auth_usecases.dart';
 export 'domain/usecases/setting/get_setting_usecase.dart';
 
 // Data layer exports
+export 'core/network/dio_client.dart';
 export 'data/data_provider/local_data_source.dart';
 export 'data/data_provider/remote_data_source.dart';
 export 'data/repositories/auth_repository_impl.dart';

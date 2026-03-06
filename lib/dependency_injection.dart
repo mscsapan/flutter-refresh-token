@@ -1,6 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dependency_injection_packages.dart';
@@ -13,9 +13,9 @@ class DInjector {
   }
 
   static final repositoryProvider = <RepositoryProvider>[
-    // Core dependencies
-    RepositoryProvider<Client>(
-      create: (context) => Client(),
+    // Core dependencies — Dio HTTP client
+    RepositoryProvider<Dio>(
+      create: (context) => DioClient.create(),
     ),
     RepositoryProvider<SharedPreferences>(
       create: (context) => _sharedPreferences,
@@ -24,7 +24,7 @@ class DInjector {
     // Data sources
     RepositoryProvider<RemoteDataSource>(
       create: (context) => RemoteDataSourceImpl(
-        client: context.read(),
+        dio: context.read<Dio>(),
       ),
     ),
     RepositoryProvider<LocalDataSource>(

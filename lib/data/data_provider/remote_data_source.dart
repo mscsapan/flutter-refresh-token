@@ -1,120 +1,101 @@
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 import '../models/auth/login_model.dart';
 import 'network_parser.dart';
 import 'remote_url.dart';
 
+// ---------------------------------------------------------------------------
+// Abstract contract
+// ---------------------------------------------------------------------------
+
 abstract class RemoteDataSource {
-  Future login(LoginModel body);
+  /// Authenticates the user with [body] credentials.
+  Future<dynamic> login(LoginModel body);
 
-  Future logout(String token);
+  /// Logs the user out on the server side.
+  Future<dynamic> logout(String token);
 
-  Future getSetting();
+  /// Fetches global application/website settings.
+  Future<dynamic> getSetting();
 }
 
-typedef CallClientMethod = Future<http.Response> Function();
+// ---------------------------------------------------------------------------
+// Implementation
+// ---------------------------------------------------------------------------
 
-class RemoteDataSourceImpl extends RemoteDataSource {
-  final http.Client client;
+class RemoteDataSourceImpl implements RemoteDataSource {
+  /// [Dio] instance — injected via [DInjector] so it can be mocked in tests.
+  final Dio dio;
 
-  RemoteDataSourceImpl({required this.client});
+  RemoteDataSourceImpl({required this.dio});
 
-  final headers = {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest',
-  };
-
-  final postDeleteHeader = {
-    'Accept': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest',
-  };
+  // ── Auth ──────────────────────────────────────────────────────────────────
 
   @override
-  Future login(LoginModel body) async {
-    final uri = Uri.parse(RemoteUrls.login);
-    final clientMethod = client.post(uri, body: body.toMap(), headers: headers);
-    final responseJsonBody =
-        await NetworkParser.callClientWithCatchException(() => clientMethod);
-    return responseJsonBody;
+  Future<dynamic> login(LoginModel body) {
+    return DioNetworkParser.call(
+      () => dio.post(RemoteUrls.login, data: body.toMap()),
+    );
   }
 
   @override
-  Future logout(String token) async {
-    final uri = Uri.parse(RemoteUrls.logout(token));
-    final clientMethod = client.get(uri, headers: headers);
-    final responseJsonBody =
-        await NetworkParser.callClientWithCatchException(() => clientMethod);
-    return responseJsonBody;
+  Future<dynamic> logout(String token) {
+    return DioNetworkParser.call(
+      // Attach the bearer token for this request only
+      () => dio.get(
+        RemoteUrls.logout(token),
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+      ),
+    );
   }
+
+  // ── Settings ──────────────────────────────────────────────────────────────
 
   @override
-  Future getSetting() async {
-    final uri = Uri.parse(RemoteUrls.websiteSetup);
-    final clientMethod = client.get(uri, headers: headers);
-    final responseJsonBody =
-        await NetworkParser.callClientWithCatchException(() => clientMethod);
-    return responseJsonBody;
+  Future<dynamic> getSetting() {
+    return DioNetworkParser.call(
+      () => dio.get(RemoteUrls.websiteSetup),
+    );
   }
 
-// @override
-// Future<String> updatePropertyRequest(
-//     String id, AddPropertyModel data, String token) async {
-//   final headers = postDeleteHeader;
-//   final uri = Uri.parse(RemoteUrls.updatePropertyUrl(id, token));
-//
-//   final request = http.MultipartRequest('POST', uri);
-//   request.fields.addAll(data.toMap());
-//
-//   request.headers.addAll(headers);
-//
-//   if (data.image.isNotEmpty && !data.image.contains('https://')) {
-//     final thumbImage =
-//         await http.MultipartFile.fromPath('thumbnail_image', data.image);
-//     request.files.add(thumbImage);
-//   }
-//   for (int i = 0; i < data.galleryImage.length; i++) {
-//     final element = data.galleryImage[i];
-//     if (element.image.isNotEmpty && !element.image.contains('https://')) {
-//       final file = await http.MultipartFile.fromPath(
-//           'slider_images[$i]', element.image);
-//       request.files.add(file);
-//     }
-//   }
-//   if (data.propertyVideoDto.videoThumbnail.isNotEmpty &&
-//       !data.propertyVideoDto.videoThumbnail.contains('https://')) {
-//     final file = await http.MultipartFile.fromPath(
-//         'video_thumbnail', data.propertyVideoDto.videoThumbnail);
-//     request.files.add(file);
-//   }
-//
-//   if (data.propertyPlanDto.isNotEmpty) {
-//     for (int i = 0; i < data.propertyPlanDto.length; i++) {
-//       final element = data.propertyPlanDto[i].planImages;
-//       final id = data.propertyPlanDto[i].id;
-//       if (element.isNotEmpty && !element.contains('https://')) {
-//         final file =
-//             await http.MultipartFile.fromPath('plan_images[$i]', element);
-//         request.files.add(file);
-//       }
-//     }
-//   }
-//
-//   http.StreamedResponse response = await request.send();
-//   final clientMethod = http.Response.fromStream(response);
-//
-//   final responseJsonBody =
-//       await NetworkParser.callClientWithCatchException(() => clientMethod);
-//   return responseJsonBody['message'] as String;
-// }
+  // ── Multipart helpers (for when you need file uploads) ───────────────────
 
-// @override
-// Future getPropertyEditInfo(String id, String token) async {
-//   final uri = Uri.parse(RemoteUrls.editInfoUrl(id, token));
-//
-//   final clientMethod = client.get(uri, headers: headers);
-//   final responseJsonBody =
-//       await NetworkParser.callClientWithCatchException(() => clientMethod);
-//   return responseJsonBody;
-// }
+  /// Sends a multipart/form-data [POST] request to [url] with optional
+  /// [fields] and [files].
+  ///
+  /// Example:
+  /// ```dart
+  /// await remoteDataSource.postMultipart(
+  ///   RemoteUrls.updateProfile,
+  ///   fields: {'name': 'Alice'},
+  ///   files: [MapEntry('avatar', await MultipartFile.fromFile('/path/img.png'))],
+  /// );
+  /// ```
+  Future<dynamic> postMultipart(
+    String url, {
+    Map<String, dynamic>? fields,
+    List<MapEntry<String, MultipartFile>>? files,
+    String? token,
+  }) {
+    final formData = FormData.fromMap({
+      if (fields != null) ...fields,
+      if (files != null)
+        for (final f in files) f.key: f.value,
+    });
+
+    return DioNetworkParser.call(
+      () => dio.post(
+        url,
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            if (token != null) 'Authorization': 'Bearer $token',
+          },
+        ),
+      ),
+    );
+  }
 }
