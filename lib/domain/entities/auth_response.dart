@@ -3,6 +3,7 @@ import 'user.dart';
 
 class AuthResponse extends Equatable {
   final String accessToken;
+  final String refreshToken;
   final String tokenType;
   final int isVendor;
   final int expireIn;
@@ -10,6 +11,7 @@ class AuthResponse extends Equatable {
 
   const AuthResponse({
     required this.accessToken,
+    this.refreshToken = '',
     required this.tokenType,
     required this.isVendor,
     required this.expireIn,
@@ -18,6 +20,7 @@ class AuthResponse extends Equatable {
 
   AuthResponse copyWith({
     String? accessToken,
+    String? refreshToken,
     String? tokenType,
     int? isVendor,
     int? expireIn,
@@ -25,6 +28,7 @@ class AuthResponse extends Equatable {
   }) {
     return AuthResponse(
       accessToken: accessToken ?? this.accessToken,
+      refreshToken: refreshToken ?? this.refreshToken,
       tokenType: tokenType ?? this.tokenType,
       isVendor: isVendor ?? this.isVendor,
       expireIn: expireIn ?? this.expireIn,
@@ -33,5 +37,6 @@ class AuthResponse extends Equatable {
   }
 
   @override
-  List<Object?> get props => [accessToken, tokenType, isVendor, expireIn, user];
+  List<Object?> get props =>
+      [accessToken, refreshToken, tokenType, isVendor, expireIn, user];
 }

@@ -9,17 +9,21 @@ abstract class AuthRepository {
     required String password,
   });
 
-  Future<Either<Failure, String>> logout(String token);
+  /// Logs the user out (token is auto-attached by the interceptor).
+  Future<Either<Failure, String>> logout();
 
   Either<Failure, AuthResponse> getExistingUserInfo();
-  
+
   Future<Either<Failure, void>> saveCredentials({
     required String email,
     required String password,
   });
-  
+
   Future<Either<Failure, void>> removeCredentials();
-  
+
+  /// Refreshes the access token using the stored refresh token.
+  Future<Either<Failure, AuthResponse>> refreshToken();
+
   // Future authentication methods (for extensibility)
   Future<Either<Failure, AuthResponse>> register({
     required String name,
@@ -27,15 +31,15 @@ abstract class AuthRepository {
     required String password,
     required String phone,
   });
-  
+
   Future<Either<Failure, String>> forgotPassword({required String email});
-  
+
   Future<Either<Failure, String>> resetPassword({
     required String email,
     required String token,
     required String password,
   });
-  
+
   Future<Either<Failure, AuthResponse>> updateProfile({
     String? name,
     String? phone,

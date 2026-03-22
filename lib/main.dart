@@ -10,6 +10,7 @@ import 'presentation/routes/route_names.dart';
 import 'presentation/utils/constraints.dart';
 import 'presentation/widgets/custom_theme.dart';
 import 'presentation/widgets/fetch_error_text.dart';
+import 'presentation/widgets/session_listener_wrapper.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,32 +41,34 @@ class TemplateProject extends StatelessWidget {
           providers: DInjector.repositoryProvider,
           child: MultiBlocProvider(
             providers: DInjector.blocProviders,
-            child: MaterialApp(
-              navigatorKey: NavigationService.navigatorKey,
-              debugShowCheckedModeBanner: false,
-              onGenerateRoute: RouteNames.generateRoutes,
-              initialRoute: RouteNames.splashScreen,
-              theme: MyTheme.theme,
-              onUnknownRoute: (RouteSettings settings) {
-                return MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return Scaffold(
-                      body: FetchErrorText(
-                        text: 'No Route Found ${settings.name}',
-                        textColor: blackColor,
-                      ),
-                    );
-                  },
-                );
-              },
-              builder: (context, child) {
-                return MediaQuery(
-                  data: MediaQuery.of(
-                    context,
-                  ).copyWith(textScaler: const TextScaler.linear(1.0)),
-                  child: child ?? SizedBox(),
-                );
-              },
+            child: SessionListenerWrapper(
+              child: MaterialApp(
+                navigatorKey: NavigationService.navigatorKey,
+                debugShowCheckedModeBanner: false,
+                onGenerateRoute: RouteNames.generateRoutes,
+                initialRoute: RouteNames.splashScreen,
+                theme: MyTheme.theme,
+                onUnknownRoute: (RouteSettings settings) {
+                  return MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return Scaffold(
+                        body: FetchErrorText(
+                          text: 'No Route Found ${settings.name}',
+                          textColor: blackColor,
+                        ),
+                      );
+                    },
+                  );
+                },
+                builder: (context, child) {
+                  return MediaQuery(
+                    data: MediaQuery.of(
+                      context,
+                    ).copyWith(textScaler: const TextScaler.linear(1.0)),
+                    child: child ?? SizedBox(),
+                  );
+                },
+              ),
             ),
           ),
         );

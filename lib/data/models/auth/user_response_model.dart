@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 
 class UserResponseModel extends Equatable {
   final String accessToken;
+  final String refreshToken;
   final String tokenType;
   final int isVendor;
   final int expireIn;
@@ -11,6 +12,7 @@ class UserResponseModel extends Equatable {
 
   const UserResponseModel({
     required this.accessToken,
+    this.refreshToken = '',
     required this.tokenType,
     required this.isVendor,
     required this.expireIn,
@@ -19,6 +21,7 @@ class UserResponseModel extends Equatable {
 
   UserResponseModel copyWith({
     String? accessToken,
+    String? refreshToken,
     String? tokenType,
     int? isVendor,
     int? expireIn,
@@ -26,6 +29,7 @@ class UserResponseModel extends Equatable {
   }) {
     return UserResponseModel(
       accessToken: accessToken ?? this.accessToken,
+      refreshToken: refreshToken ?? this.refreshToken,
       tokenType: tokenType ?? this.tokenType,
       isVendor: isVendor ?? this.isVendor,
       expireIn: expireIn ?? this.expireIn,
@@ -36,6 +40,7 @@ class UserResponseModel extends Equatable {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'access_token': accessToken,
+      'refresh_token': refreshToken,
       'token_type': tokenType,
       'is_vendor': isVendor,
       'expires_in': expireIn,
@@ -46,6 +51,7 @@ class UserResponseModel extends Equatable {
   factory UserResponseModel.fromMap(Map<String, dynamic> map) {
     return UserResponseModel(
       accessToken: map['access_token'] ?? '',
+      refreshToken: map['refresh_token'] ?? '',
       tokenType: map['token_type'] ?? '',
       isVendor: map['is_vendor'] ?? 0,
       expireIn: map['expires_in'] ?? 0,
@@ -67,6 +73,7 @@ class UserResponseModel extends Equatable {
   List<Object?> get props {
     return [
       accessToken,
+      refreshToken,
       tokenType,
       isVendor,
       expireIn,

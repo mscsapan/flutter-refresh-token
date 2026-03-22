@@ -19,6 +19,7 @@ extension UserResponseModelAuthMapper on UserResponseModel {
   AuthResponse toDomain() {
     return AuthResponse(
       accessToken: accessToken,
+      refreshToken: refreshToken,
       tokenType: tokenType,
       isVendor: isVendor,
       expireIn: expireIn,
@@ -44,6 +45,7 @@ extension AuthResponseDomainMapper on AuthResponse {
   UserResponseModel toData() {
     return UserResponseModel(
       accessToken: accessToken,
+      refreshToken: refreshToken,
       tokenType: tokenType,
       isVendor: isVendor,
       expireIn: expireIn,

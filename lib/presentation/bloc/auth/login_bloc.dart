@@ -4,6 +4,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/failures/failures.dart';
+import '../../../core/network/dio_client.dart';
+import '../../../core/network/token_manager.dart';
 import '../../../core/usecases/usecase.dart';
 import '../../../domain/entities/auth_response.dart';
 import '../../../domain/usecases/auth/auth_usecases.dart';
@@ -29,6 +31,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       super(const LoginInitial()) {
     on<LoginEventSubmit>(_onLoginSubmit);
     on<LoginEventLogout>(_onLogout);
+    on<LoginEventSessionExpired>(_onSessionExpired);
 
     // Load existing user info on initialization
     _loadExistingUser();
@@ -90,15 +93,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
     emit(const LogoutLoading());
 
-    final params = LogoutParams(token: _user!.accessToken);
-    final result = await _authUseCases.logout(params);
+    final result = await _authUseCases.logout(NoParams());
 
     result.fold(
           (failure) {
         if (failure.statusCode == 500) {
           // Handle server error but still logout locally
-          _user = null;
-          removeCredentials();
+          _performLocalLogout();
           emit(const LogoutLoaded(message: 'Logout successful'));
         } else {
           emit(
@@ -110,10 +111,29 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         }
       },
           (message) {
-        _user = null;
-        removeCredentials();
+        _performLocalLogout();
         emit(LogoutLoaded(message: message));
       },
     );
+  }
+
+  /// Handles session expiry (triggered by the [AuthInterceptor] when refresh
+  /// fails).
+  Future<void> _onSessionExpired(
+    LoginEventSessionExpired event,
+    Emitter<LoginState> emit,
+  ) async {
+    _performLocalLogout();
+    emit(SessionExpired(
+      message: event.message ?? 'Session expired. Please login again.',
+    ));
+  }
+
+  /// Clean up local state on logout / session expiry.
+  void _performLocalLogout() {
+    _user = null;
+    removeCredentials();
+    TokenManager.instance.clearTokens();
+    DioClient.reset();
   }
 }

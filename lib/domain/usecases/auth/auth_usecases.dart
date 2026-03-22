@@ -25,15 +25,28 @@ class LoginUseCase implements UseCase<AuthResponse, LoginParams> {
   }
 }
 
-/// Logout Use Case
-class LogoutUseCase implements UseCase<String, LogoutParams> {
+/// Logout Use Case — no longer requires a token parameter since the
+/// [AuthInterceptor] attaches it automatically.
+class LogoutUseCase implements UseCase<String, NoParams> {
   final AuthRepository repository;
 
   LogoutUseCase(this.repository);
 
   @override
-  Future<Either<Failure, String>> call(LogoutParams params) async {
-    return await repository.logout(params.token);
+  Future<Either<Failure, String>> call(NoParams params) async {
+    return await repository.logout();
+  }
+}
+
+/// Refresh Token Use Case
+class RefreshTokenUseCase implements UseCase<AuthResponse, NoParams> {
+  final AuthRepository repository;
+
+  RefreshTokenUseCase(this.repository);
+
+  @override
+  Future<Either<Failure, AuthResponse>> call(NoParams params) async {
+    return await repository.refreshToken();
   }
 }
 
@@ -154,15 +167,6 @@ class LoginParams extends Equatable {
   List<Object> get props => [email, password];
 }
 
-class LogoutParams extends Equatable {
-  final String token;
-
-  const LogoutParams({required this.token});
-
-  @override
-  List<Object> get props => [token];
-}
-
 class CredentialsParams extends Equatable {
   final String email;
   final String password;
@@ -240,6 +244,7 @@ class UpdateProfileParams extends Equatable {
 class AuthUseCases {
   final LoginUseCase login;
   final LogoutUseCase logout;
+  final RefreshTokenUseCase refreshToken;
   final GetExistingUserInfoUseCase getExistingUserInfo;
   final SaveCredentialsUseCase saveCredentials;
   final RemoveCredentialsUseCase removeCredentials;
@@ -251,6 +256,7 @@ class AuthUseCases {
   AuthUseCases({
     required this.login,
     required this.logout,
+    required this.refreshToken,
     required this.getExistingUserInfo,
     required this.saveCredentials,
     required this.removeCredentials,
@@ -265,6 +271,7 @@ class AuthUseCases {
     return AuthUseCases(
       login: LoginUseCase(repository),
       logout: LogoutUseCase(repository),
+      refreshToken: RefreshTokenUseCase(repository),
       getExistingUserInfo: GetExistingUserInfoUseCase(repository),
       saveCredentials: SaveCredentialsUseCase(repository),
       removeCredentials: RemoveCredentialsUseCase(repository),

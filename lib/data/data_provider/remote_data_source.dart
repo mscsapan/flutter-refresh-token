@@ -13,7 +13,10 @@ abstract class RemoteDataSource {
   Future<dynamic> login(LoginModel body);
 
   /// Logs the user out on the server side.
-  Future<dynamic> logout(String token);
+  Future<dynamic> logout();
+
+  /// Requests new access + refresh tokens using a valid refresh token.
+  Future<dynamic> refreshToken(String refreshToken);
 
   /// Fetches global application/website settings.
   Future<dynamic> getSetting();
@@ -39,14 +42,19 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   }
 
   @override
-  Future<dynamic> logout(String token) {
+  Future<dynamic> logout() {
+    // Token is now automatically attached by AuthInterceptor
     return DioNetworkParser.call(
-      // Attach the bearer token for this request only
-      () => dio.get(
-        RemoteUrls.logout(token),
-        options: Options(
-          headers: {'Authorization': 'Bearer $token'},
-        ),
+      () => dio.post(RemoteUrls.logout),
+    );
+  }
+
+  @override
+  Future<dynamic> refreshToken(String refreshToken) {
+    return DioNetworkParser.call(
+      () => dio.post(
+        RemoteUrls.refreshToken,
+        data: {'refresh_token': refreshToken},
       ),
     );
   }
@@ -77,7 +85,6 @@ class RemoteDataSourceImpl implements RemoteDataSource {
     String url, {
     Map<String, dynamic>? fields,
     List<MapEntry<String, MultipartFile>>? files,
-    String? token,
   }) {
     final formData = FormData.fromMap({
       if (fields != null) ...fields,
@@ -92,7 +99,6 @@ class RemoteDataSourceImpl implements RemoteDataSource {
         options: Options(
           headers: {
             'Content-Type': 'multipart/form-data',
-            if (token != null) 'Authorization': 'Bearer $token',
           },
         ),
       ),

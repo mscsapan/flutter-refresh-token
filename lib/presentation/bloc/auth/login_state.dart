@@ -72,3 +72,16 @@ class LogoutError extends LoginState {
   @override
   List<Object> get props => [message, statusCode];
 }
+
+/// Emitted when the session has expired and the user needs to re-authenticate.
+///
+/// The UI should listen for this state and navigate the user to the login
+/// screen, optionally showing [message].
+class SessionExpired extends LoginState {
+  final String message;
+
+  const SessionExpired({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}

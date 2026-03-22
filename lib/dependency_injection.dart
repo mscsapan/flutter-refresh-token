@@ -1,15 +1,23 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 import 'dependency_injection_packages.dart';
 
 class DInjector {
   static late final SharedPreferences _sharedPreferences;
 
+  /// Pre-configured [FlutterSecureStorage] instance for sensitive data.
+  static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+
   static Future<void> initDB() async {
     _sharedPreferences = await SharedPreferences.getInstance();
+
+    // Initialise the token manager so cached tokens are available immediately
+    await TokenManager.instance.init();
   }
 
   static final repositoryProvider = <RepositoryProvider>[
@@ -20,6 +28,9 @@ class DInjector {
     RepositoryProvider<SharedPreferences>(
       create: (context) => _sharedPreferences,
     ),
+    RepositoryProvider<FlutterSecureStorage>(
+      create: (context) => _secureStorage,
+    ),
 
     // Data sources
     RepositoryProvider<RemoteDataSource>(
@@ -29,7 +40,8 @@ class DInjector {
     ),
     RepositoryProvider<LocalDataSource>(
       create: (context) => LocalDataSourceImpl(
-        sharedPreferences: context.read(),
+        sharedPreferences: context.read<SharedPreferences>(),
+        secureStorage: context.read<FlutterSecureStorage>(),
       ),
     ),
 
@@ -38,6 +50,7 @@ class DInjector {
       create: (context) => AuthRepositoryImpl(
         remoteDataSources: context.read(),
         localDataSources: context.read(),
+        tokenManager: TokenManager.instance,
       ),
     ),
     RepositoryProvider<SettingRepository>(

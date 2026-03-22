@@ -17,7 +17,8 @@ class RemoteUrls {
   static const String register = 'store-register';
   static const String login    = 'store-login';
 
-  static String logout(String token) => 'user/logout?token=$token';
+  static const String logout  = 'user/logout';
+  static const String refreshToken   = 'refresh-token';
 
   static const String sendForgetPassword = 'send-forget-password';
   static const String resendRegisterCode = 'resend-register-code';

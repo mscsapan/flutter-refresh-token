@@ -4,7 +4,7 @@ abstract class LoginEvent extends Equatable {
   const LoginEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class LoginEventSubmit extends LoginEvent {
@@ -24,4 +24,15 @@ class LoginEventSubmit extends LoginEvent {
 
 class LoginEventLogout extends LoginEvent {
   const LoginEventLogout();
+}
+
+/// Dispatched when the [AuthInterceptor] detects that the session has expired
+/// (refresh token is also invalid / missing).
+class LoginEventSessionExpired extends LoginEvent {
+  final String? message;
+
+  const LoginEventSessionExpired({this.message});
+
+  @override
+  List<Object?> get props => [message];
 }
