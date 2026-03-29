@@ -1,23 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/connectivity_aware_mixin.dart';
+import '../../widgets/connectivity_builder.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen>
-    with ConnectivityAwareMixin {
-  @override
-  void onConnectionRestored() {
-    debugPrint('Connection restored');
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return buildWithConnectivity(child: const Scaffold());
+    return Scaffold(
+      body: ConnectivityBuilder(
+        onRetry: () {},
+        child: Center(child: Text('Splash Screen')),
+      ),
+    );
   }
 }

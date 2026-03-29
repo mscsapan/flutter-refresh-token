@@ -24,4 +24,4 @@ export 'data/repositories/setting_repository_impl.dart';
 export 'presentation/bloc/auth/login_bloc.dart';
 export 'presentation/cubit/setting/setting_cubit.dart';
 export 'presentation/bloc/internet_status/internet_status_bloc.dart';
-export 'presentation/utils/connectivity_aware_mixin.dart';
+export 'presentation/widgets/connectivity_builder.dart';
