@@ -150,7 +150,6 @@ class AuthRepositoryImpl implements AuthRepository {
     required String phone,
   }) async {
     try {
-      // TODO: Implement actual register API call
       return Left(ServerFailure('Register not implemented yet', 501));
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, e.statusCode));
@@ -160,9 +159,10 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, String>> forgotPassword({required String email}) async {
+  Future<Either<Failure, String>> forgotPassword({
+    required String email,
+  }) async {
     try {
-      // TODO: Implement actual forgot password API call
       return Left(ServerFailure('Forgot password not implemented yet', 501));
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, e.statusCode));
@@ -178,7 +178,6 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      // TODO: Implement actual reset password API call
       return Left(ServerFailure('Reset password not implemented yet', 501));
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, e.statusCode));
@@ -194,7 +193,6 @@ class AuthRepositoryImpl implements AuthRepository {
     String? image,
   }) async {
     try {
-      // TODO: Implement actual update profile API call
       return Left(ServerFailure('Update profile not implemented yet', 501));
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, e.statusCode));

@@ -22,15 +22,9 @@ class DInjector {
 
   static final repositoryProvider = <RepositoryProvider>[
     // Core dependencies — Dio HTTP client
-    RepositoryProvider<Dio>(
-      create: (context) => DioClient.create(),
-    ),
-    RepositoryProvider<SharedPreferences>(
-      create: (context) => _sharedPreferences,
-    ),
-    RepositoryProvider<FlutterSecureStorage>(
-      create: (context) => _secureStorage,
-    ),
+    RepositoryProvider<Dio>(create: (context) => DioClient.create()),
+    RepositoryProvider<SharedPreferences>(create: (context) => _sharedPreferences),
+    RepositoryProvider<FlutterSecureStorage>(create: (context) => _secureStorage),
 
     // Data sources
     RepositoryProvider<RemoteDataSource>(
