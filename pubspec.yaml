@@ -14,11 +14,11 @@ dependencies:
     sdk: flutter
 
   # ---------- UI & Styling ----------
-  flutter_svg: ^2.2.3               # Render SVG assets in Flutter
-  flutter_screenutil: ^5.9.3        # Responsive UI (screen size & pixel density adaptation)
-  google_fonts: ^7.0.1              # Use Google Fonts easily in Flutter
-  cupertino_icons: ^1.0.8           # iOS style icons for Cupertino widgets
-  cached_network_image: ^3.4.1      # Display & cache network images efficiently
+  flutter_svg: ^2.2.3              # Render SVG assets in Flutter
+  flutter_screenutil: ^5.9.3       # Responsive UI (screen size & pixel density adaptation)
+  google_fonts: ^8.0.2             # Use Google Fonts easily in Flutter
+  cupertino_icons: ^1.0.9          # iOS style icons for Cupertino widgets
+  cached_network_image: ^3.4.1     # Display & cache network images efficiently
 
   # ---------- State Management ----------
   equatable: ^2.0.8                 # Simplifies equality checks in Dart classes (great for states/events)
@@ -26,12 +26,12 @@ dependencies:
 
   # ---------- Data & APIs ----------
   dartz: ^0.10.1                    # Functional programming tools (Either, Option, etc.)
-  dio: ^5.8.0+1                     # Powerful HTTP client with interceptors, timeouts & advanced features
+  dio: ^5.8.2                       # Powerful HTTP client with interceptors, timeouts & advanced features
   pretty_dio_logger: ^1.4.0         # Pretty-print Dio request/response logs for debugging
-  shared_preferences: ^2.5.4        # Store key-value pairs locally (lightweight persistent storage)
+  shared_preferences: ^2.5.5        # Store key-value pairs locally (lightweight persistent storage)
   flutter_secure_storage: ^9.2.4    # Store sensitive data (tokens, passwords) in encrypted storage
   intl: ^0.20.2                     # Internationalization & date formatting
-  connectivity_plus: ^7.0.0         # Check network connectivity status
+  connectivity_plus: ^7.1.0         # Check network connectivity status
 
   # ---------- Optional/Commented Packages ----------
   # file_picker: ^10.3.2             # Pick files from device storage
@@ -49,7 +49,7 @@ dev_dependencies:
     sdk: flutter
   
   # Testing packages
-  mockito: ^5.6.3                  # Mock objects for testing
+  mockito: ^5.6.3                   # Mock objects for testing
   build_runner: ^2.10.5             # Code generation runner
   bloc_test: ^10.0.0                # Testing utilities for BLoC (compatible version)
   mocktail: ^1.0.4                  # Alternative mocking library

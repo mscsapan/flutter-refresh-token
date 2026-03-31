@@ -1,4 +1,4 @@
-import 'package:bloc_clean_architecture/data/data_provider/remote_url.dart';
+import '../../data/data_provider/remote_url.dart';
 
 enum Environment { development, staging, production }
 
