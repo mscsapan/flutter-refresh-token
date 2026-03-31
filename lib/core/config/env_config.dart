@@ -1,3 +1,5 @@
+import 'package:bloc_clean_architecture/data/data_provider/remote_url.dart';
+
 enum Environment { development, staging, production }
 
 class EnvConfig {
@@ -5,18 +7,17 @@ class EnvConfig {
 
   static Environment get environment => _environment;
 
-  static void setEnvironment(Environment env) {
-    _environment = env;
-  }
+  static void setEnvironment(Environment env) => _environment = env;
+
 
   static String get baseUrl {
     switch (_environment) {
       case Environment.development:
-        return 'https://dev-api.yourapp.com/api/v1';
+        return RemoteUrls.getDevUrl;
       case Environment.staging:
-        return 'https://staging-api.yourapp.com/api/v1';
+        return RemoteUrls.getStagingUrl;
       case Environment.production:
-        return 'https://api.yourapp.com/api/v1';
+        return RemoteUrls.getProductionUrl;
     }
   }
 

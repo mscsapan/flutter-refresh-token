@@ -8,6 +8,7 @@ import '../config/env_config.dart';
 import 'auth_interceptor.dart';
 import 'retry_interceptor.dart';
 import 'token_manager.dart';
+import 'token_refresh_service.dart';
 
 /// Factory that creates and configures [Dio] instances.
 ///
@@ -16,8 +17,8 @@ import 'token_manager.dart';
 ///   globally so individual methods don't need to repeat them.
 /// - In non-production environments a [PrettyDioLogger] interceptor is added
 ///   for structured, coloured request/response logging.
-/// - [AuthInterceptor] automatically injects bearer tokens and refreshes
-///   expired tokens transparently (when enabled via [EnvConfig.enableRefreshToken]).
+/// - [AuthInterceptor] automatically injects bearer tokens and delegates token
+///   refresh to [TokenRefreshService] (when enabled via [EnvConfig.enableRefreshToken]).
 /// - [RetryInterceptor] automatically retries failed requests when the device
 ///   regains connectivity.
 class DioClient {
@@ -26,15 +27,32 @@ class DioClient {
   /// The single app-wide [Dio] instance.
   static Dio? _instance;
 
+  /// The single [TokenRefreshService] instance shared with [AuthInterceptor]
+  /// and [AuthSessionCubit].
+  static TokenRefreshService? _tokenRefreshService;
+
+  /// Returns the singleton [TokenRefreshService].
+  ///
+  /// Created alongside the [Dio] instance so that [AuthSessionCubit] can be
+  /// wired to the same service instance via DI.
+  static TokenRefreshService get tokenRefreshService {
+    if (_tokenRefreshService == null) {
+      // Trigger creation of both singletons together
+      create();
+    }
+    return _tokenRefreshService!;
+  }
+
   /// Returns the singleton [Dio] instance, creating it on first access.
   ///
   /// Interceptor order matters:
-  ///  1. **AuthInterceptor** — attaches token + handles 401 refresh
+  ///  1. **AuthInterceptor** — attaches token + delegates 401 refresh to
+  ///     [TokenRefreshService]
   ///  2. **RetryInterceptor** — retries on network errors (waits for connectivity)
   ///  3. **PrettyDioLogger** — logs requests/responses (debug only)
   ///  4. **Error logger** — structured error logging
   static Dio create() {
-    if (_instance != null) return _instance!;
+    if (_instance != null) return _instance ?? Dio();
 
     final dio = Dio(
       BaseOptions(
@@ -50,37 +68,52 @@ class DioClient {
       ),
     );
 
-    // ── 1. Auth interceptor ───────────────────────────────────────────────
-    // Only add the full auth interceptor if refresh token is enabled
-    if (EnvConfig.enableRefreshToken) {
-      // Uses a *separate* Dio instance for the refresh call to avoid deadlocks
-      // with QueuedInterceptorsWrapper.
-      final refreshDio = Dio(
-        BaseOptions(
-          baseUrl: EnvConfig.baseUrl,
-          connectTimeout: EnvConfig.connectionTimeout,
-          receiveTimeout: EnvConfig.receiveTimeout,
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-          },
-          responseType: ResponseType.json,
-        ),
-      );
+    // ── Shared refresh Dio (used by both TokenRefreshService and for retrying) ─
+    // Uses a *separate* Dio instance for the refresh call to avoid deadlocks
+    // with QueuedInterceptorsWrapper.
+    final refreshDio = Dio(
+      BaseOptions(
+        baseUrl: EnvConfig.baseUrl,
+        connectTimeout: EnvConfig.connectionTimeout,
+        receiveTimeout: EnvConfig.receiveTimeout,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        responseType: ResponseType.json,
+      ),
+    );
 
+    // ── Create the TokenRefreshService singleton ───────────────────────────
+    // Always create it so AuthSessionCubit can be wired in DI regardless of
+    // whether EnvConfig.enableRefreshToken is true.
+    _tokenRefreshService = TokenRefreshService(
+      refreshDio: refreshDio,
+      tokenManager: TokenManager.instance,
+    );
+
+    // ── 1. Auth interceptor ───────────────────────────────────────────────
+    if (EnvConfig.enableRefreshToken) {
+      // Full auth interceptor: injects token + delegates refresh to
+      // TokenRefreshService (which uses UserResponseModel + DioNetworkParser)
       dio.interceptors.add(
         AuthInterceptor(
           refreshDio: refreshDio,
           tokenManager: TokenManager.instance,
+          tokenRefreshService: _tokenRefreshService!,
         ),
       );
     } else {
       // Backend doesn't support refresh tokens yet.
       // Still inject the access token on every request but DON'T attempt
-      // refresh on 401 — just let the error propagate and force logout.
+      // refresh on 401 — just notify the session as expired so the
+      // AuthSessionCubit can handle the UI transition.
       dio.interceptors.add(
-        _TokenOnlyInterceptor(tokenManager: TokenManager.instance),
+        _TokenOnlyInterceptor(
+          tokenManager: TokenManager.instance,
+          tokenRefreshService: _tokenRefreshService!,
+        ),
       );
     }
 
@@ -103,6 +136,7 @@ class DioClient {
           responseHeader: false,
           error: true,
           compact: true,
+          //enabled: kDebugMode,
         ),
       );
     }
@@ -132,6 +166,8 @@ class DioClient {
   static void reset() {
     _instance?.close();
     _instance = null;
+    _tokenRefreshService?.dispose();
+    _tokenRefreshService = null;
   }
 }
 
@@ -142,13 +178,17 @@ class DioClient {
 /// Used when the backend does NOT support refresh tokens.
 ///
 /// Simply attaches `Authorization: Bearer <token>` to every request.
-/// On 401, the error is passed through so the UI / repository can handle it
-/// (e.g. show "Session expired, please log in again").
+/// On 401, notifies [TokenRefreshService] so [AuthSessionCubit] emits
+/// [AuthSessionExpired] and the UI navigates to the login screen.
 class _TokenOnlyInterceptor extends Interceptor {
   final TokenManager _tokenManager;
+  final TokenRefreshService _tokenRefreshService;
 
-  _TokenOnlyInterceptor({required TokenManager tokenManager})
-      : _tokenManager = tokenManager;
+  _TokenOnlyInterceptor({
+    required TokenManager tokenManager,
+    required TokenRefreshService tokenRefreshService,
+  })  : _tokenManager = tokenManager,
+        _tokenRefreshService = tokenRefreshService;
 
   @override
   void onRequest(
@@ -160,5 +200,14 @@ class _TokenOnlyInterceptor extends Interceptor {
       options.headers['Authorization'] = 'Bearer $token';
     }
     handler.next(options);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    if (err.response?.statusCode == 401) {
+      // Notify the AuthSessionCubit via the shared service stream
+      _tokenRefreshService.notifySessionExpired();
+    }
+    handler.next(err);
   }
 }

@@ -2,16 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/auth/login_bloc.dart';
+import '../cubit/auth_session/auth_session_cubit.dart';
+import '../cubit/auth_session/auth_session_state.dart';
 import '../routes/route_names.dart';
 
-/// Wraps the app's child widget with a global [BlocListener] that reacts to
-/// [SessionExpired] state from the [LoginBloc].
+/// Wraps the app's child widget with global [BlocListener]s that react to
+/// session-state changes from **two** sources:
 ///
-/// When the token refresh fails and [SessionExpired] is emitted, this widget:
+/// | Source             | State            | Trigger                              |
+/// |--------------------|------------------|--------------------------------------|
+/// | [AuthSessionCubit] | [AuthSessionExpired] | 401 intercepted by [AuthInterceptor] / [TokenRefreshService] |
+/// | [LoginBloc]        | [SessionExpired] | Legacy / explicit event dispatch     |
+///
+/// On either expiry state this widget:
 ///  1. Shows a SnackBar informing the user.
 ///  2. Navigates to the auth screen and clears the navigation stack.
 ///
-/// Usage in `main.dart`:
+/// Usage in `main.dart` (unchanged):
 /// ```dart
 /// SessionListenerWrapper(child: MaterialApp(…))
 /// ```
@@ -22,28 +29,49 @@ class SessionListenerWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<LoginBloc, LoginState>(
-      listenWhen: (previous, current) => current is SessionExpired,
-      listener: (context, state) {
-        if (state is SessionExpired) {
-          // Show feedback
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.orange.shade800,
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 4),
-            ),
-          );
+    return MultiBlocListener(
+      listeners: [
+        // ── Primary: AuthSessionCubit ─────────────────────────────────────
+        // Triggered by TokenRefreshService when the interceptor receives a 401
+        // that cannot be recovered (refresh failed or no refresh token).
+        BlocListener<AuthSessionCubit, AuthSessionState>(
+          listenWhen: (previous, current) => current is AuthSessionExpired,
+          listener: (context, state) {
+            if (state is AuthSessionExpired) {
+              _handleSessionExpired(context, state.message);
+            }
+          },
+        ),
 
-          // Navigate to auth screen and remove all previous routes
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            RouteNames.authScreen,
-            (route) => false,
-          );
-        }
-      },
+        // ── Legacy: LoginBloc ─────────────────────────────────────────────
+        // Kept for backward compatibility — e.g. if LoginEventSessionExpired
+        // is dispatched explicitly from somewhere in the UI layer.
+        BlocListener<LoginBloc, LoginState>(
+          listenWhen: (previous, current) => current is SessionExpired,
+          listener: (context, state) {
+            if (state is SessionExpired) {
+              _handleSessionExpired(context, state.message);
+            }
+          },
+        ),
+      ],
       child: child,
+    );
+  }
+
+  void _handleSessionExpired(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.orange.shade800,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 4),
+      ),
+    );
+
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      RouteNames.authScreen,
+      (route) => false,
     );
   }
 }

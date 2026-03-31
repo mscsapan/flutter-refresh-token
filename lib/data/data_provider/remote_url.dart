@@ -13,6 +13,10 @@ class RemoteUrls {
   // Note: the API base URL itself is now controlled by EnvConfig.baseUrl.
   static const String _rootUrl = 'https://www.aarcorealty.in/';
 
+  static String get getDevUrl => _rootUrl;
+  static String get getStagingUrl => _rootUrl;
+  static String get getProductionUrl => _rootUrl;
+
   // ── Auth endpoints ────────────────────────────────────────────────────────
   static const String register = 'store-register';
   static const String login    = 'store-login';
@@ -26,8 +30,7 @@ class RemoteUrls {
   static const String userVerification   = 'user-verification';
   static const String resendVerification = 'resend-register';
 
-  static String changePassword(String token) =>
-      'user/update-password?token=$token';
+  static String changePassword(String token) => 'user/update-password?token=$token';
 
   // ── Settings ──────────────────────────────────────────────────────────────
   static const String websiteSetup = 'website-setup';

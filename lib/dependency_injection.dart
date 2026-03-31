@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 import 'dependency_injection_packages.dart';
 
 class DInjector {
@@ -23,14 +22,16 @@ class DInjector {
   static final repositoryProvider = <RepositoryProvider>[
     // Core dependencies — Dio HTTP client
     RepositoryProvider<Dio>(create: (context) => DioClient.create()),
-    RepositoryProvider<SharedPreferences>(create: (context) => _sharedPreferences),
-    RepositoryProvider<FlutterSecureStorage>(create: (context) => _secureStorage),
+    RepositoryProvider<SharedPreferences>(
+      create: (context) => _sharedPreferences,
+    ),
+    RepositoryProvider<FlutterSecureStorage>(
+      create: (context) => _secureStorage,
+    ),
 
     // Data sources
     RepositoryProvider<RemoteDataSource>(
-      create: (context) => RemoteDataSourceImpl(
-        dio: context.read<Dio>(),
-      ),
+      create: (context) => RemoteDataSourceImpl(dio: context.read<Dio>()),
     ),
     RepositoryProvider<LocalDataSource>(
       create: (context) => LocalDataSourceImpl(
@@ -64,18 +65,21 @@ class DInjector {
   ];
 
   static final blocProviders = <BlocProvider>[
-    BlocProvider<InternetStatusBloc>(
-      create: (context) => InternetStatusBloc(),
+    BlocProvider<InternetStatusBloc>(create: (context) => InternetStatusBloc()),
+    // AuthSessionCubit manages session lifecycle (token refresh & expiry).
+    // It listens to TokenRefreshService.sessionStream which is broadcast by
+    // AuthInterceptor (or _TokenOnlyInterceptor) on every 401.
+    BlocProvider<AuthSessionCubit>(
+      create: (context) =>
+          AuthSessionCubit(tokenRefreshService: DioClient.tokenRefreshService),
     ),
     BlocProvider<LoginBloc>(
-      create: (BuildContext context) => LoginBloc(
-        authUseCases: context.read<AuthUseCases>(),
-      ),
+      create: (BuildContext context) =>
+          LoginBloc(authUseCases: context.read<AuthUseCases>()),
     ),
     BlocProvider<SettingCubit>(
-      create: (BuildContext context) => SettingCubit(
-        getSettingUseCase: context.read<GetSettingUseCase>(),
-      ),
+      create: (BuildContext context) =>
+          SettingCubit(getSettingUseCase: context.read<GetSettingUseCase>()),
     ),
   ];
 }
