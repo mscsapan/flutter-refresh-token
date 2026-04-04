@@ -1,597 +1,1105 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+/// Unified Clean Architecture Code Generator
+///
+/// Combined generator with numbered menu system and subfolder support
+class UnifiedGenerator {
 
-class CodeGenerator {
-  static Future<void> generateFeature(String featureName) async {
-    final pascalCase = _toPascalCase(featureName);
-    final snakeCase = _toSnakeCase(featureName);
-    final camelCase = _toCamelCase(featureName);
+  /// Main menu system
+  static Future<void> showMainMenu() async {
+    print('');
+    print('🏗️  CLEAN ARCHITECTURE CODE GENERATOR');
+    print('════════════════════════════════════════');
+    print('');
+    print('Available Commands:');
+    print('');
+    print('1️⃣  Generate Entity from Model');
+    print('2️⃣  Generate Mapper from Model + Entity');
+    print('3️⃣  Generate UseCase from Repository');
+    print('4️⃣  Generate Remote DataSource from Model');
+    print('5️⃣  Generate Local DataSource from Model');
+    print('6️⃣  Generate Complete Feature Set');
+    print('');
+    print('0️⃣  Exit');
+    print('');
 
-    // Create directories
-    await _createDirectories(snakeCase);
+    stdout.write('Select option (0-6): ');
+    final choice = stdin.readLineSync();
 
-    // Generate files
-    await _generateEntity(pascalCase, snakeCase);
-    await _generateRepository(pascalCase, snakeCase);
-    await _generateRepositoryImpl(pascalCase, snakeCase);
-    await _generateModel(pascalCase, snakeCase);
-    await _generateUseCase(pascalCase, snakeCase, camelCase);
-    await _generateCubit(pascalCase, snakeCase, camelCase);
-    await _generateScreen(pascalCase, snakeCase);
+    switch (choice) {
+      case '1':
+        await handleGenerateEntity();
+        break;
+      case '2':
+        await handleGenerateMapper();
+        break;
+      case '3':
+        await handleGenerateUseCase();
+        break;
+      case '4':
+        await handleGenerateRemoteDataSource();
+        break;
+      case '5':
+        await handleGenerateLocalDataSource();
+        break;
+      case '6':
+        await handleGenerateCompleteFeature();
+        break;
+      case '0':
+        print('👋 Goodbye!');
+        return;
+      default:
+        print('❌ Invalid option. Please try again.');
+        await showMainMenu();
+    }
 
-    debugPrint('✅ Feature "$featureName" generated successfully!');
-    debugPrint('📁 Files created:');
-    debugPrint('  - lib/domain/entities/$snakeCase.dart');
-    debugPrint('  - lib/domain/repositories/${snakeCase}_repository.dart');
-    debugPrint('  - lib/data/repositories/${snakeCase}_repository_impl.dart');
-    debugPrint('  - lib/data/models/$snakeCase/${snakeCase}_model.dart');
-    debugPrint('  - lib/domain/usecases/$snakeCase/get_${snakeCase}_usecase.dart');
-    debugPrint('  - lib/presentation/cubit/$snakeCase/${snakeCase}_cubit.dart');
-    debugPrint('  - lib/presentation/cubit/$snakeCase/${snakeCase}_state.dart');
-    debugPrint('  - lib/presentation/screens/$snakeCase/${snakeCase}_screen.dart');
+    print('');
+    print('✨ Operation completed!');
+    print('');
+    stdout.write('Continue? (y/n): ');
+    final continueChoice = stdin.readLineSync();
+    if (continueChoice?.toLowerCase().startsWith('y') ?? false) {
+      await showMainMenu();
+    }
   }
 
-  static Future<void> _createDirectories(String snakeCase) async {
-    final directories = [
-      'lib/domain/entities',
+  /// Handle Generate Entity
+  static Future<void> handleGenerateEntity() async {
+    print('');
+    print('📋 GENERATE ENTITY FROM MODEL');
+    print('─────────────────────────────────');
+
+    stdout.write('Enter model path: ');
+    final modelPath = stdin.readLineSync();
+    if (modelPath == null || modelPath.isEmpty) {
+      print('❌ Model path is required');
+      return;
+    }
+
+    stdout.write('Create entity in subfolder? (y/n): ');
+    final useSubfolder = stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
+
+    String? customPath;
+    if (!useSubfolder) {
+      stdout.write('Enter custom entity path (or press Enter for default): ');
+      final input = stdin.readLineSync();
+      customPath = input?.isEmpty == false ? input : null;
+    }
+
+    await generateEntityFromModel(
+      modelPath,
+      useSubfolder: useSubfolder,
+      customEntityPath: customPath,
+    );
+  }
+
+  /// Handle Generate Mapper
+  static Future<void> handleGenerateMapper() async {
+    print('');
+    print('🗺️  GENERATE MAPPER FROM MODEL + ENTITY');
+    print('─────────────────────────────────────────');
+
+    stdout.write('Enter model path: ');
+    final modelPath = stdin.readLineSync();
+    if (modelPath == null || modelPath.isEmpty) {
+      print('❌ Model path is required');
+      return;
+    }
+
+    stdout.write('Enter entity path: ');
+    final entityPath = stdin.readLineSync();
+    if (entityPath == null || entityPath.isEmpty) {
+      print('❌ Entity path is required');
+      return;
+    }
+
+    stdout.write('Create mapper in subfolder? (y/n): ');
+    final useSubfolder = stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
+
+    String? customPath;
+    String? subfolderName;
+
+    if (useSubfolder) {
+      stdout.write('Enter subfolder name: ');
+      subfolderName = stdin.readLineSync();
+      if (subfolderName == null || subfolderName.isEmpty) {
+        print('❌ Subfolder name is required when using subfolder');
+        return;
+      }
+    } else {
+      stdout.write('Enter custom mapper path (or press Enter for default): ');
+      final input = stdin.readLineSync();
+      customPath = input?.isEmpty == false ? input : null;
+    }
+
+    await generateMapperFromFiles(
+      modelPath,
+      entityPath,
+      customMapperPath: customPath,
+      subfolderName: subfolderName,
+    );
+  }
+
+  /// Handle Generate UseCase
+  static Future<void> handleGenerateUseCase() async {
+    print('');
+    print('🎯 GENERATE USECASE FROM REPOSITORY');
+    print('──────────────────────────────────────');
+
+    stdout.write('Enter repository path: ');
+    final repositoryPath = stdin.readLineSync();
+    if (repositoryPath == null || repositoryPath.isEmpty) {
+      print('❌ Repository path is required');
+      return;
+    }
+
+    stdout.write('Create UseCase in subfolder? (y/n): ');
+    final useSubfolder = stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
+
+    String? customPath;
+    String? subfolderName;
+
+    if (useSubfolder) {
+      stdout.write('Enter subfolder name: ');
+      subfolderName = stdin.readLineSync();
+      if (subfolderName == null || subfolderName.isEmpty) {
+        print('❌ Subfolder name is required when using subfolder');
+        return;
+      }
+    } else {
+      stdout.write('Enter custom UseCase path (or press Enter for default): ');
+      final input = stdin.readLineSync();
+      customPath = input?.isEmpty == false ? input : null;
+    }
+
+    await generateUseCaseFromRepository(
+      repositoryPath,
+      customUseCasePath: customPath,
+      subfolderName: subfolderName,
+    );
+  }
+
+  /// Handle Generate Remote DataSource
+  static Future<void> handleGenerateRemoteDataSource() async {
+    print('');
+    print('🌐 GENERATE REMOTE DATASOURCE FROM MODEL');
+    print('───────────────────────────────────────────');
+
+    stdout.write('Enter model path: ');
+    final modelPath = stdin.readLineSync();
+    if (modelPath == null || modelPath.isEmpty) {
+      print('❌ Model path is required');
+      return;
+    }
+
+    stdout.write('Create DataSource in subfolder? (y/n): ');
+    final useSubfolder = stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
+
+    String? customPath;
+    String? subfolderName;
+
+    if (useSubfolder) {
+      stdout.write('Enter subfolder name: ');
+      subfolderName = stdin.readLineSync();
+      if (subfolderName == null || subfolderName.isEmpty) {
+        print('❌ Subfolder name is required when using subfolder');
+        return;
+      }
+    } else {
+      stdout.write('Enter custom DataSource path (or press Enter for default): ');
+      final input = stdin.readLineSync();
+      customPath = input?.isEmpty == false ? input : null;
+    }
+
+    await generateDataSourceFromModel(
+      modelPath,
+      isRemote: true,
+      customDataSourcePath: customPath,
+      subfolderName: subfolderName,
+    );
+  }
+
+  /// Handle Generate Local DataSource
+  static Future<void> handleGenerateLocalDataSource() async {
+    print('');
+    print('💾 GENERATE LOCAL DATASOURCE FROM MODEL');
+    print('─────────────────────────────────────────');
+
+    stdout.write('Enter model path: ');
+    final modelPath = stdin.readLineSync();
+    if (modelPath == null || modelPath.isEmpty) {
+      print('❌ Model path is required');
+      return;
+    }
+
+    stdout.write('Create DataSource in subfolder? (y/n): ');
+    final useSubfolder = stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
+
+    String? customPath;
+    String? subfolderName;
+
+    if (useSubfolder) {
+      stdout.write('Enter subfolder name: ');
+      subfolderName = stdin.readLineSync();
+      if (subfolderName == null || subfolderName.isEmpty) {
+        print('❌ Subfolder name is required when using subfolder');
+        return;
+      }
+    } else {
+      stdout.write('Enter custom DataSource path (or press Enter for default): ');
+      final input = stdin.readLineSync();
+      customPath = input?.isEmpty == false ? input : null;
+    }
+
+    await generateDataSourceFromModel(
+      modelPath,
+      isRemote: false,
+      customDataSourcePath: customPath,
+      subfolderName: subfolderName,
+    );
+  }
+
+  /// Handle Generate Complete Feature
+  static Future<void> handleGenerateCompleteFeature() async {
+    print('');
+    print('🏗️  GENERATE COMPLETE FEATURE SET');
+    print('──────────────────────────────────────');
+
+    stdout.write('Enter model path: ');
+    final modelPath = stdin.readLineSync();
+    if (modelPath == null || modelPath.isEmpty) {
+      print('❌ Model path is required');
+      return;
+    }
+
+    print('');
+    print('⚠️  This will generate:');
+    print('   - Entity');
+    print('   - Repository Interface');
+    print('   - Repository Implementation');
+    print('   - UseCase');
+    print('   - Remote DataSource');
+    print('   - Local DataSource');
+    print('   - Mapper');
+    print('');
+
+    stdout.write('Continue? (y/n): ');
+    final confirm = stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
+    if (!confirm) {
+      print('❌ Operation cancelled');
+      return;
+    }
+
+    await generateCompleteFeature(modelPath);
+  }
+
+  /// Core generation methods
+
+  /// Generates an entity from an existing model file
+  static Future<void> generateEntityFromModel(
+      String modelPath, {
+        bool useSubfolder = true,
+        String? customEntityPath,
+      }) async {
+    print('🏗️ Generating entity from model: $modelPath');
+
+    final modelFile = File(modelPath);
+    if (!await modelFile.exists()) {
+      print('❌ Model file not found: $modelPath');
+      return;
+    }
+
+    final modelContent = await modelFile.readAsString();
+    final analysis = _analyzeModel(modelContent, modelPath);
+
+    if (analysis == null) {
+      print('❌ Could not analyze model file');
+      return;
+    }
+
+    print('📋 Analysis complete:');
+    print('   - Model Class: ${analysis.className}');
+    print('   - Feature Name: ${analysis.featureName}');
+    print('   - Properties: ${analysis.properties.length}');
+
+    // Determine entity path
+    String entityPath;
+    if (customEntityPath != null) {
+      entityPath = customEntityPath;
+    } else if (useSubfolder) {
+      entityPath = 'lib/domain/entities/${analysis.featureName}/${analysis.featureName}_entity.dart';
+      await Directory('lib/domain/entities/${analysis.featureName}').create(recursive: true);
+    } else {
+      entityPath = 'lib/domain/entities/${analysis.featureName}_entity.dart';
+      await Directory('lib/domain/entities').create(recursive: true);
+    }
+
+    // Generate entity content
+    final entityContent = _generateEntityContent(analysis);
+
+    // Write entity file
+    await File(entityPath).writeAsString(entityContent);
+
+    print('✅ Entity generated successfully: $entityPath');
+  }
+
+  /// Generates a mapper from existing model and entity files
+  static Future<void> generateMapperFromFiles(
+      String modelPath,
+      String entityPath, {
+        String? customMapperPath,
+        String? subfolderName,
+      }) async {
+    print('🗺️ Generating mapper from model and entity');
+    print('   Model: $modelPath');
+    print('   Entity: $entityPath');
+
+    final modelFile = File(modelPath);
+    final entityFile = File(entityPath);
+
+    if (!await modelFile.exists()) {
+      print('❌ Model file not found: $modelPath');
+      return;
+    }
+
+    if (!await entityFile.exists()) {
+      print('❌ Entity file not found: $entityPath');
+      return;
+    }
+
+    final modelContent = await modelFile.readAsString();
+    final entityContent = await entityFile.readAsString();
+
+    final modelAnalysis = _analyzeModel(modelContent, modelPath);
+    final entityAnalysis = _analyzeEntity(entityContent, entityPath);
+
+    if (modelAnalysis == null || entityAnalysis == null) {
+      print('❌ Could not analyze files');
+      return;
+    }
+
+    // Determine mapper path
+    String mapperPath;
+    if (customMapperPath != null) {
+      mapperPath = customMapperPath;
+    } else if (subfolderName != null) {
+      mapperPath = 'lib/data/mappers/$subfolderName/${modelAnalysis.featureName}_mapper.dart';
+      await Directory('lib/data/mappers/$subfolderName').create(recursive: true);
+    } else {
+      mapperPath = 'lib/data/mappers/${modelAnalysis.featureName}_mapper.dart';
+      await Directory('lib/data/mappers').create(recursive: true);
+    }
+
+    // Generate mapper content
+    final mapperContent = _generateMapperContent(modelAnalysis, entityAnalysis);
+
+    // Write mapper file
+    await File(mapperPath).writeAsString(mapperContent);
+
+    print('✅ Mapper generated successfully: $mapperPath');
+  }
+
+  /// Generates a use case from an existing repository
+  static Future<void> generateUseCaseFromRepository(
+      String repositoryPath, {
+        String? customUseCasePath,
+        String? subfolderName,
+      }) async {
+    print('🎯 Generating UseCase from repository: $repositoryPath');
+
+    final repoFile = File(repositoryPath);
+    if (!await repoFile.exists()) {
+      print('❌ Repository file not found: $repositoryPath');
+      return;
+    }
+
+    final repoContent = await repoFile.readAsString();
+    final analysis = _analyzeRepository(repoContent, repositoryPath);
+
+    if (analysis == null) {
+      print('❌ Could not analyze repository file');
+      return;
+    }
+
+    print('📋 Analysis complete:');
+    print('   - Repository: ${analysis.className}');
+    print('   - Feature: ${analysis.featureName}');
+    print('   - Methods: ${analysis.methods.length}');
+
+    // Determine use case path
+    String useCasePath;
+    if (customUseCasePath != null) {
+      useCasePath = customUseCasePath;
+    } else if (subfolderName != null) {
+      useCasePath = 'lib/domain/use_cases/$subfolderName/${analysis.featureName}_use_case.dart';
+      await Directory('lib/domain/use_cases/$subfolderName').create(recursive: true);
+    } else {
+      useCasePath = 'lib/domain/use_cases/${analysis.featureName}/${analysis.featureName}_use_case.dart';
+      await Directory('lib/domain/use_cases/${analysis.featureName}').create(recursive: true);
+    }
+
+    // Generate use case content
+    final useCaseContent = _generateUseCaseContent(analysis);
+
+    // Write use case file
+    await File(useCasePath).writeAsString(useCaseContent);
+
+    print('✅ UseCase generated successfully: $useCasePath');
+  }
+
+  /// Generates a data source from existing model
+  static Future<void> generateDataSourceFromModel(
+      String modelPath, {
+        bool isRemote = true,
+        String? customDataSourcePath,
+        String? subfolderName,
+      }) async {
+    final sourceType = isRemote ? 'Remote' : 'Local';
+    print('🌐 Generating $sourceType DataSource from model: $modelPath');
+
+    final modelFile = File(modelPath);
+    if (!await modelFile.exists()) {
+      print('❌ Model file not found: $modelPath');
+      return;
+    }
+
+    final modelContent = await modelFile.readAsString();
+    final analysis = _analyzeModel(modelContent, modelPath);
+
+    if (analysis == null) {
+      print('❌ Could not analyze model file');
+      return;
+    }
+
+    print('📋 Analysis complete:');
+    print('   - Model Class: ${analysis.className}');
+    print('   - Feature: ${analysis.featureName}');
+
+    // Determine data source path
+    String dataSourcePath;
+    if (customDataSourcePath != null) {
+      dataSourcePath = customDataSourcePath;
+    } else if (subfolderName != null) {
+      dataSourcePath = 'lib/data/data_sources/$subfolderName/${analysis.featureName}_${sourceType.toLowerCase()}_data_source.dart';
+      await Directory('lib/data/data_sources/$subfolderName').create(recursive: true);
+    } else {
+      dataSourcePath = 'lib/data/data_sources/${analysis.featureName}_${sourceType.toLowerCase()}_data_source.dart';
+      await Directory('lib/data/data_sources').create(recursive: true);
+    }
+
+    // Generate data source content
+    final dataSourceContent = _generateDataSourceContent(analysis, isRemote);
+
+    // Write data source file
+    await File(dataSourcePath).writeAsString(dataSourceContent);
+
+    print('✅ $sourceType DataSource generated successfully: $dataSourcePath');
+  }
+
+  /// Generates complete feature set from model
+  static Future<void> generateCompleteFeature(String modelPath) async {
+    print('🏗️ Generating complete feature set from: $modelPath');
+
+    final modelFile = File(modelPath);
+    if (!await modelFile.exists()) {
+      print('❌ Model file not found: $modelPath');
+      return;
+    }
+
+    final modelContent = await modelFile.readAsString();
+    final analysis = _analyzeModel(modelContent, modelPath);
+
+    if (analysis == null) {
+      print('❌ Could not analyze model file');
+      return;
+    }
+
+    final featureName = analysis.featureName;
+    print('📋 Generating complete feature set for: ${featureName.toUpperCase()}');
+
+    // Create directory structure
+    await _createFeatureDirectories(featureName);
+
+    // Generate all files
+    await _generateEntityForFeature(analysis);
+    await _generateMapperForFeature(analysis);
+    await _generateRepositoryInterfaceForFeature(analysis);
+    await _generateRepositoryImplForFeature(analysis);
+    await _generateDataSourceForFeature(analysis, true);  // Remote
+    await _generateDataSourceForFeature(analysis, false); // Local
+    await _generateUseCaseForFeature(analysis);
+
+    print('✅ Complete feature set generated for: ${featureName.toUpperCase()}');
+    print('📁 Generated files:');
+    print('   - Entity: lib/domain/entities/$featureName/${featureName}_entity.dart');
+    print('   - Repository Interface: lib/domain/repositories/${featureName}_repository.dart');
+    print('   - UseCase: lib/domain/use_cases/$featureName/${featureName}_use_case.dart');
+    print('   - Repository Impl: lib/data/repositories/${featureName}_repository_impl.dart');
+    print('   - Mapper: lib/data/mappers/${featureName}_mapper.dart');
+    print('   - Remote DataSource: lib/data/data_sources/${featureName}_remote_data_source.dart');
+    print('   - Local DataSource: lib/data/data_sources/${featureName}_local_data_source.dart');
+  }
+
+  // Helper methods for complete feature generation
+  static Future<void> _createFeatureDirectories(String featureName) async {
+    final dirs = [
+      'lib/domain/entities/$featureName',
       'lib/domain/repositories',
+      'lib/domain/use_cases/$featureName',
       'lib/data/repositories',
-      'lib/data/models/$snakeCase',
-      'lib/domain/usecases/$snakeCase',
-      'lib/presentation/cubit/$snakeCase',
-      'lib/presentation/screens/$snakeCase',
+      'lib/data/mappers',
+      'lib/data/data_sources',
     ];
 
-    for (final dir in directories) {
+    for (final dir in dirs) {
       await Directory(dir).create(recursive: true);
     }
   }
 
-  static Future<void> _generateEntity(
-    String pascalCase,
-    String snakeCase,
-  ) async {
-    final content =
-        '''import 'package:equatable/equatable.dart';
+  static Future<void> _generateEntityForFeature(ModelAnalysis analysis) async {
+    final entityContent = _generateEntityContent(analysis);
+    await File('lib/domain/entities/${analysis.featureName}/${analysis.featureName}_entity.dart')
+        .writeAsString(entityContent);
+  }
 
-class $pascalCase extends Equatable {
-  final int id;
-  final String name;
-  // TODO: Add your entity properties here
+  static Future<void> _generateMapperForFeature(ModelAnalysis analysis) async {
+    // Create mock entity analysis for mapper generation
+    final entityAnalysis = EntityAnalysis(
+      className: '${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Entity',
+      featureName: analysis.featureName,
+      properties: analysis.properties.map((p) => PropertyInfo(
+        type: _convertModelTypeToEntityType(p.type),
+        name: p.name,
+      )).toList(),
+      filePath: 'lib/domain/entities/${analysis.featureName}/${analysis.featureName}_entity.dart',
+    );
 
-  const $pascalCase({
-    required this.id,
-    required this.name,
+    final mapperContent = _generateMapperContent(analysis, entityAnalysis);
+    await File('lib/data/mappers/${analysis.featureName}_mapper.dart')
+        .writeAsString(mapperContent);
+  }
+
+  static Future<void> _generateRepositoryInterfaceForFeature(ModelAnalysis analysis) async {
+    final content = _generateRepositoryInterfaceContent(analysis);
+    await File('lib/domain/repositories/${analysis.featureName}_repository.dart')
+        .writeAsString(content);
+  }
+
+  static Future<void> _generateRepositoryImplForFeature(ModelAnalysis analysis) async {
+    final content = _generateRepositoryImplContent(analysis);
+    await File('lib/data/repositories/${analysis.featureName}_repository_impl.dart')
+        .writeAsString(content);
+  }
+
+  static Future<void> _generateDataSourceForFeature(ModelAnalysis analysis, bool isRemote) async {
+    final content = _generateDataSourceContent(analysis, isRemote);
+    final type = isRemote ? 'remote' : 'local';
+    await File('lib/data/data_sources/${analysis.featureName}_${type}_data_source.dart')
+        .writeAsString(content);
+  }
+
+  static Future<void> _generateUseCaseForFeature(ModelAnalysis analysis) async {
+    // Create mock repository analysis for use case generation
+    final repoAnalysis = RepositoryAnalysis(
+      className: '${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Repository',
+      featureName: analysis.featureName,
+      methods: ['get${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Data'],
+      filePath: 'lib/domain/repositories/${analysis.featureName}_repository.dart',
+    );
+
+    final content = _generateUseCaseContent(repoAnalysis);
+    await File('lib/domain/use_cases/${analysis.featureName}/${analysis.featureName}_use_case.dart')
+        .writeAsString(content);
+  }
+
+  // Analysis methods
+  static ModelAnalysis? _analyzeModel(String content, String filePath) {
+    try {
+      // Extract class name
+      final classMatch = RegExp(r'class\s+(\w+)\s+extends').firstMatch(content);
+      if (classMatch == null) return null;
+
+      final className = classMatch.group(1)!;
+      final featureName = className.toLowerCase().replaceAll('model', '');
+
+      // Extract properties
+      final propertyMatches = RegExp(r'final\s+([^;]+?)\s+(\w+);').allMatches(content);
+      final properties = propertyMatches.map((match) {
+        final type = match.group(1)!.trim();
+        final name = match.group(2)!.trim();
+        return PropertyInfo(type: type, name: name);
+      }).toList();
+
+      return ModelAnalysis(
+        className: className,
+        featureName: featureName,
+        properties: properties,
+        filePath: filePath,
+      );
+    } catch (e) {
+      print('Error analyzing model: $e');
+      return null;
+    }
+  }
+
+  static EntityAnalysis? _analyzeEntity(String content, String filePath) {
+    try {
+      // Extract class name
+      final classMatch = RegExp(r'class\s+(\w+)\s+extends').firstMatch(content);
+      if (classMatch == null) return null;
+
+      final className = classMatch.group(1)!;
+      final featureName = className.toLowerCase().replaceAll('entity', '');
+
+      // Extract properties
+      final propertyMatches = RegExp(r'final\s+([^;]+?)\s+(\w+);').allMatches(content);
+      final properties = propertyMatches.map((match) {
+        final type = match.group(1)!.trim();
+        final name = match.group(2)!.trim();
+        return PropertyInfo(type: type, name: name);
+      }).toList();
+
+      return EntityAnalysis(
+        className: className,
+        featureName: featureName,
+        properties: properties,
+        filePath: filePath,
+      );
+    } catch (e) {
+      print('Error analyzing entity: $e');
+      return null;
+    }
+  }
+
+  static RepositoryAnalysis? _analyzeRepository(String content, String filePath) {
+    try {
+      final classMatch = RegExp(r'class\s+(\w+)\s+implements').firstMatch(content);
+      if (classMatch == null) return null;
+
+      final className = classMatch.group(1)!;
+      final featureName = className.toLowerCase()
+          .replaceAll('repositoryimpl', '')
+          .replaceAll('repository', '');
+
+      // Extract methods
+      final methodMatches = RegExp(r'Future<[^>]+>\s+(\w+)\(').allMatches(content);
+      final methods = methodMatches.map((m) => m.group(1)!).toList();
+
+      return RepositoryAnalysis(
+        className: className,
+        featureName: featureName,
+        methods: methods,
+        filePath: filePath,
+      );
+    } catch (e) {
+      print('Error analyzing repository: $e');
+      return null;
+    }
+  }
+
+  // Content generation methods
+  static String _generateEntityContent(ModelAnalysis analysis) {
+    final className = '${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Entity';
+
+    final entityProperties = analysis.properties.map((prop) {
+      final entityType = _convertModelTypeToEntityType(prop.type);
+      return PropertyInfo(type: entityType, name: prop.name);
+    }).toList();
+
+    final propertyDeclarations = entityProperties
+        .map((p) => '  final ${p.type} ${p.name};')
+        .join('\n');
+
+    final constructorParams = entityProperties
+        .map((p) => '    required this.${p.name},')
+        .join('\n');
+
+    final copyWithParams = entityProperties
+        .map((p) => '    ${p.type}? ${p.name},')
+        .join('\n');
+
+    final copyWithAssignments = entityProperties
+        .map((p) => '      ${p.name}: ${p.name} ?? this.${p.name},')
+        .join('\n');
+
+    final propsContent = entityProperties.map((p) => p.name).join(', ');
+
+    return '''import 'package:equatable/equatable.dart';
+
+/// Domain Entity for ${analysis.featureName.toUpperCase()}
+/// 
+/// This represents the core business object in the domain layer.
+class $className extends Equatable {
+$propertyDeclarations
+
+  const $className({
+$constructorParams
   });
 
-  $pascalCase copyWith({
-    int? id,
-    String? name,
+  $className copyWith({
+$copyWithParams
   }) {
-    return $pascalCase(
-      id: id ?? this.id,
-      name: name ?? this.name,
+    return $className(
+$copyWithAssignments
     );
   }
 
   @override
-  List<Object> get props => [id, name];
-}''';
+  List<Object?> get props => [$propsContent];
 
-    await _writeFile('lib/domain/entities/$snakeCase.dart', content);
+  @override
+  String toString() {
+    return '$className{${entityProperties.map((p) => '${p.name}: \\\$${p.name}').join(', ')}}';
+  }
+}''';
   }
 
-  static Future<void> _generateRepository(
-    String pascalCase,
-    String snakeCase,
-  ) async {
-    final content =
-        '''import 'package:dartz/dartz.dart';
+  static String _generateMapperContent(ModelAnalysis modelAnalysis, EntityAnalysis entityAnalysis) {
+    final modelClass = modelAnalysis.className;
+    final entityClass = entityAnalysis.className;
+    final featureName = modelAnalysis.featureName;
 
-import '../../core/failures/failures.dart';
-import '../entities/$snakeCase.dart';
+    final modelToEntityMappings = _generatePropertyMappings(
+      modelAnalysis.properties,
+      entityAnalysis.properties,
+    );
 
-abstract class ${pascalCase}Repository {
-  Future<Either<Failure, List<$pascalCase>>> get${pascalCase}s();
-  Future<Either<Failure, $pascalCase>> get${pascalCase}ById(int id);
-  Future<Either<Failure, $pascalCase>> create$pascalCase($pascalCase $snakeCase);
-  Future<Either<Failure, $pascalCase>> update$pascalCase($pascalCase $snakeCase);
-  Future<Either<Failure, bool>> delete$pascalCase(int id);
-}''';
+    final entityToModelMappings = _generatePropertyMappings(
+      entityAnalysis.properties,
+      modelAnalysis.properties,
+    );
 
-    await _writeFile(
-      'lib/domain/repositories/${snakeCase}_repository.dart',
-      content,
+    return '''import '../../domain/entities/$featureName/${featureName}_entity.dart';
+import '../models/$featureName/${featureName}_model.dart';
+
+/// Mappers for ${featureName.toUpperCase()}
+extension ${modelClass}Mapper on $modelClass {
+  /// Converts data model to domain entity
+  $entityClass toDomain() {
+    return $entityClass(
+$modelToEntityMappings
     );
   }
+}
 
-  static Future<void> _generateRepositoryImpl(
-    String pascalCase,
-    String snakeCase,
-  ) async {
-    final content =
-        '''import 'package:dartz/dartz.dart';
-import 'package:flutter/material.dart';
+extension ${entityClass}Mapper on $entityClass {
+  /// Converts domain entity to data model
+  $modelClass toData() {
+    return $modelClass(
+$entityToModelMappings
+    );
+  }
+}''';
+  }
+
+  static String _generateUseCaseContent(RepositoryAnalysis analysis) {
+    final featureName = analysis.featureName;
+    final pascalFeatureName = featureName.split('_').map((e) =>
+    '${e[0].toUpperCase()}${e.substring(1)}').join('');
+    final useCaseClass = 'Get${pascalFeatureName}UseCase';
+    final repositoryClass = '${pascalFeatureName}Repository';
+    final entityClass = '${pascalFeatureName}Entity';
+
+    return '''import 'package:dartz/dartz.dart';
+
+import '../../core/failures/failures.dart';
+import '../../core/use_cases/use_case.dart';
+import '../entities/$featureName/${featureName}_entity.dart';
+import '../repositories/${featureName}_repository.dart';
+
+/// Use Case for fetching ${featureName.toUpperCase()} data
+/// 
+/// This encapsulates the business logic for getting $featureName data
+class $useCaseClass implements UseCase<$entityClass, NoParams> {
+  final $repositoryClass repository;
+
+  $useCaseClass(this.repository);
+
+  @override
+  Future<Either<Failure, $entityClass>> call(NoParams params) async {
+    return await repository.get${pascalFeatureName}Data();
+  }
+}''';
+  }
+
+  static String _generateDataSourceContent(ModelAnalysis analysis, bool isRemote) {
+    final featureName = analysis.featureName;
+    final pascalFeatureName = featureName.split('_').map((e) =>
+    '${e[0].toUpperCase()}${e.substring(1)}').join('');
+    final sourceType = isRemote ? 'Remote' : 'Local';
+    final abstractClass = '$pascalFeatureName${sourceType}DataSource';
+    final implClass = '$pascalFeatureName${sourceType}DataSourceImpl';
+
+    final dataSourceContent = isRemote
+        ? _generateRemoteDataSourceContent(analysis, abstractClass, implClass)
+        : _generateLocalDataSourceContent(analysis, abstractClass, implClass);
+
+    return dataSourceContent;
+  }
+
+  static String _generateRemoteDataSourceContent(ModelAnalysis analysis, String abstractClass, String implClass) {
+    final featureName = analysis.featureName;
+    final pascalFeatureName = featureName.split('_').map((e) =>
+    '${e[0].toUpperCase()}${e.substring(1)}').join('');
+
+    return '''import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+import '../../core/exceptions/exceptions.dart';
+
+/// Abstract class for ${featureName.toUpperCase()} remote data source
+abstract class $abstractClass {
+  Future<Map<String, dynamic>> get${pascalFeatureName}Data();
+}
+
+/// Implementation of ${featureName.toUpperCase()} remote data source
+class $implClass implements $abstractClass {
+  final http.Client client;
+  static const String baseUrl = 'https://your-api-url.com';
+
+  $implClass({required this.client});
+
+  @override
+  Future<Map<String, dynamic>> get${pascalFeatureName}Data() async {
+    try {
+      final response = await client.get(
+        Uri.parse('\$baseUrl/$featureName'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data as Map<String, dynamic>;
+      } else {
+        throw ServerException(
+          'Failed to fetch $featureName data',
+          response.statusCode,
+        );
+      }
+    } catch (e) {
+      throw ServerException('Network error: \$e', 0);
+    }
+  }
+}''';
+  }
+
+  static String _generateLocalDataSourceContent(ModelAnalysis analysis, String abstractClass, String implClass) {
+    final featureName = analysis.featureName;
+    final pascalFeatureName = featureName.split('_').map((e) =>
+    '${e[0].toUpperCase()}${e.substring(1)}').join('');
+
+    return '''import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../core/exceptions/exceptions.dart';
+
+/// Abstract class for ${featureName.toUpperCase()} local data source
+abstract class $abstractClass {
+  Future<Map<String, dynamic>> get${pascalFeatureName}Data();
+  Future<void> cache${pascalFeatureName}Data(Map<String, dynamic> data);
+}
+
+/// Implementation of ${featureName.toUpperCase()} local data source
+class $implClass implements $abstractClass {
+  final SharedPreferences sharedPreferences;
+  static const String cacheKey = 'CACHED_${featureName.toUpperCase()}_DATA';
+
+  $implClass({required this.sharedPreferences});
+
+  @override
+  Future<Map<String, dynamic>> get${pascalFeatureName}Data() async {
+    final jsonString = sharedPreferences.getString(cacheKey);
+    
+    if (jsonString != null) {
+      final data = json.decode(jsonString);
+      return data as Map<String, dynamic>;
+    } else {
+      throw CacheException('No cached data found for $featureName');
+    }
+  }
+
+  @override
+  Future<void> cache${pascalFeatureName}Data(Map<String, dynamic> data) async {
+    final jsonString = json.encode(data);
+    await sharedPreferences.setString(cacheKey, jsonString);
+  }
+}''';
+  }
+
+  static String _generateRepositoryInterfaceContent(ModelAnalysis analysis) {
+    final featureName = analysis.featureName;
+    final pascalFeatureName = featureName.split('_').map((e) =>
+    '${e[0].toUpperCase()}${e.substring(1)}').join('');
+    final repositoryClass = '${pascalFeatureName}Repository';
+    final entityClass = '${pascalFeatureName}Entity';
+
+    return '''import 'package:dartz/dartz.dart';
+
+import '../../core/failures/failures.dart';
+import '../entities/$featureName/${featureName}_entity.dart';
+
+/// Repository interface for ${featureName.toUpperCase()}
+/// 
+/// Defines the contract for $featureName data operations
+abstract class $repositoryClass {
+  Future<Either<Failure, $entityClass>> get${pascalFeatureName}Data();
+}''';
+  }
+
+  static String _generateRepositoryImplContent(ModelAnalysis analysis) {
+    final featureName = analysis.featureName;
+    final pascalFeatureName = featureName.split('_').map((e) =>
+    '${e[0].toUpperCase()}${e.substring(1)}').join('');
+    final repositoryClass = '${pascalFeatureName}Repository';
+    final repositoryImplClass = '${pascalFeatureName}RepositoryImpl';
+    final entityClass = '${pascalFeatureName}Entity';
+    final modelClass = '${pascalFeatureName}Model';
+
+    return '''import 'package:dartz/dartz.dart';
 
 import '../../core/exceptions/exceptions.dart';
 import '../../core/failures/failures.dart';
-import '../../domain/entities/$snakeCase.dart';
-import '../../domain/repositories/${snakeCase}_repository.dart';
-import '../data_provider/remote_data_source.dart';
-import '../models/$snakeCase/${snakeCase}_model.dart';
+import '../../core/network/network_info.dart';
+import '../../domain/entities/$featureName/${featureName}_entity.dart';
+import '../../domain/repositories/${featureName}_repository.dart';
+import '../data_sources/${featureName}_local_data_source.dart';
+import '../data_sources/${featureName}_remote_data_source.dart';
+import '../mappers/${featureName}_mapper.dart';
+import '../models/$featureName/${featureName}_model.dart';
 
-class ${pascalCase}RepositoryImpl implements ${pascalCase}Repository {
-  final RemoteDataSource remoteDataSources;
+/// Implementation of ${featureName.toUpperCase()} repository
+class $repositoryImplClass implements $repositoryClass {
+  final ${pascalFeatureName}RemoteDataSource remoteDataSource;
+  final ${pascalFeatureName}LocalDataSource localDataSource;
+  final NetworkInfo networkInfo;
 
-  ${pascalCase}RepositoryImpl({required this.remoteDataSources});
-
-  @override
-  Future<Either<Failure, List<$pascalCase>>> get${pascalCase}s() async {
-    debugPrint('$snakeCase-debug: $snakeCase-repo impl get${pascalCase}s');
-    try {
-      final result = await remoteDataSources.get${pascalCase}s();
-      final ${snakeCase}s = result as List;
-      final ${snakeCase}Models = List<${pascalCase}Model>.from(${snakeCase}s.map((e) => ${pascalCase}Model.fromMap(e))).toList();
-      final ${snakeCase}Entities = ${snakeCase}Models.map((model) => model.toEntity()).toList();
-      return Right(${snakeCase}Entities);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message, e.statusCode));
-    }
-  }
-
-  @override
-  Future<Either<Failure, $pascalCase>> get${pascalCase}ById(int id) async {
-    debugPrint('$snakeCase-debug: $snakeCase-repo impl get${pascalCase}ById');
-    try {
-      final result = await remoteDataSources.get${pascalCase}ById(id);
-      final ${snakeCase}Model = ${pascalCase}Model.fromMap(result);
-      return Right(${snakeCase}Model.toEntity());
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message, e.statusCode));
-    }
-  }
-
-  @override
-  Future<Either<Failure, $pascalCase>> create$pascalCase($pascalCase $snakeCase) async {
-    debugPrint('$snakeCase-debug: $snakeCase-repo impl create$pascalCase');
-    try {
-      final ${snakeCase}Model = ${pascalCase}Model.fromEntity($snakeCase);
-      final result = await remoteDataSources.create$pascalCase(${snakeCase}Model);
-      final created${pascalCase}Model = ${pascalCase}Model.fromMap(result);
-      return Right(created${pascalCase}Model.toEntity());
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message, e.statusCode));
-    }
-  }
-
-  @override
-  Future<Either<Failure, $pascalCase>> update$pascalCase($pascalCase $snakeCase) async {
-    debugPrint('$snakeCase-debug: $snakeCase-repo impl update$pascalCase');
-    try {
-      final ${snakeCase}Model = ${pascalCase}Model.fromEntity($snakeCase);
-      final result = await remoteDataSources.update$pascalCase(${snakeCase}Model);
-      final updated${pascalCase}Model = ${pascalCase}Model.fromMap(result);
-      return Right(updated${pascalCase}Model.toEntity());
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message, e.statusCode));
-    }
-  }
-
-  @override
-  Future<Either<Failure, bool>> delete$pascalCase(int id) async {
-    debugPrint('$snakeCase-debug: $snakeCase-repo impl delete$pascalCase');
-    try {
-      await remoteDataSources.delete$pascalCase(id);
-      return const Right(true);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message, e.statusCode));
-    }
-  }
-}''';
-
-    await _writeFile(
-      'lib/data/repositories/${snakeCase}_repository_impl.dart',
-      content,
-    );
-  }
-
-  static Future<void> _generateModel(
-    String pascalCase,
-    String snakeCase,
-  ) async {
-    final content =
-        '''import 'dart:convert';
-
-import 'package:equatable/equatable.dart';
-
-import '../../../domain/entities/$snakeCase.dart';
-
-class ${pascalCase}Model extends Equatable {
-  final int id;
-  final String name;
-  // TODO: Add your model properties here
-
-  const ${pascalCase}Model({
-    required this.id,
-    required this.name,
+  $repositoryImplClass({
+    required this.remoteDataSource,
+    required this.localDataSource,
+    required this.networkInfo,
   });
 
-  ${pascalCase}Model copyWith({
-    int? id,
-    String? name,
-  }) {
-    return ${pascalCase}Model(
-      id: id ?? this.id,
-      name: name ?? this.name,
-    );
-  }
-
-  // Convert from domain entity to data model
-  factory ${pascalCase}Model.fromEntity($pascalCase $snakeCase) {
-    return ${pascalCase}Model(
-      id: $snakeCase.id,
-      name: $snakeCase.name,
-    );
-  }
-
-  // Convert to domain entity
-  $pascalCase toEntity() {
-    return $pascalCase(
-      id: id,
-      name: name,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'id': id,
-      'name': name,
-    };
-  }
-
-  factory ${pascalCase}Model.fromMap(Map<String, dynamic> map) {
-    return ${pascalCase}Model(
-      id: map['id'] ?? 0,
-      name: map['name'] ?? '',
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory ${pascalCase}Model.fromJson(String source) => ${pascalCase}Model.fromMap(json.decode(source) as Map<String, dynamic>);
-
   @override
-  bool get stringify => true;
-
-  @override
-  List<Object> get props => [id, name];
-}''';
-
-    await _writeFile(
-      'lib/data/models/$snakeCase/${snakeCase}_model.dart',
-      content,
-    );
-  }
-
-  static Future<void> _generateUseCase(
-    String pascalCase,
-    String snakeCase,
-    String camelCase,
-  ) async {
-    final content =
-        '''import 'package:dartz/dartz.dart';
-import 'package:flutter/cupertino.dart';
-
-import '../../../core/failures/failures.dart';
-import '../../../core/usecases/usecase.dart';
-import '../../entities/$snakeCase.dart';
-import '../../repositories/${snakeCase}_repository.dart';
-
-class Get${pascalCase}sUseCase implements OptionalParamUseCase<List<$pascalCase>, NoParams> {
-  final ${pascalCase}Repository repository;
-
-  Get${pascalCase}sUseCase(this.repository);
-
-  @override
-  Future<Either<Failure, List<$pascalCase>>> call([NoParams? params]) async {
-    debugPrint('$snakeCase-debug: get-${snakeCase}s-use case');
-    return await repository.get${pascalCase}s();
-  }
-}
-
-class Get${pascalCase}ByIdUseCase implements UseCase<$pascalCase, int> {
-  final ${pascalCase}Repository repository;
-
-  Get${pascalCase}ByIdUseCase(this.repository);
-
-  @override
-  Future<Either<Failure, $pascalCase>> call(int id) async {
-    debugPrint('$snakeCase-debug: get-$snakeCase-by-id-use case');
-    return await repository.get${pascalCase}ById(id);
-  }
-}
-
-class Create${pascalCase}UseCase implements UseCase<$pascalCase, $pascalCase> {
-  final ${pascalCase}Repository repository;
-
-  Create${pascalCase}UseCase(this.repository);
-
-  @override
-  Future<Either<Failure, $pascalCase>> call($pascalCase $camelCase) async {
-    debugPrint('$snakeCase-debug: create-$snakeCase-use case');
-    return await repository.create$pascalCase($camelCase);
-  }
-}
-
-class Update${pascalCase}UseCase implements UseCase<$pascalCase, $pascalCase> {
-  final ${pascalCase}Repository repository;
-
-  Update${pascalCase}UseCase(this.repository);
-
-  @override
-  Future<Either<Failure, $pascalCase>> call($pascalCase $camelCase) async {
-    debugPrint('$snakeCase-debug: update-$snakeCase-use case');
-    return await repository.update$pascalCase($camelCase);
-  }
-}
-
-class Delete${pascalCase}UseCase implements UseCase<bool, int> {
-  final ${pascalCase}Repository repository;
-
-  Delete${pascalCase}UseCase(this.repository);
-
-  @override
-  Future<Either<Failure, bool>> call(int id) async {
-    debugPrint('$snakeCase-debug: delete-$snakeCase-use case');
-    return await repository.delete$pascalCase(id);
-  }
-}''';
-
-    await _writeFile(
-      'lib/domain/usecases/$snakeCase/get_${snakeCase}_usecase.dart',
-      content,
-    );
-  }
-
-  static Future<void> _generateCubit(
-    String pascalCase,
-    String snakeCase,
-    String camelCase,
-  ) async {
-    final cubitContent =
-        '''import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../core/usecases/usecase.dart';
-import '../../../domain/entities/$snakeCase.dart';
-import '../../../domain/usecases/$snakeCase/get_${snakeCase}_usecase.dart';
-
-part '${snakeCase}_state.dart';
-
-class ${pascalCase}Cubit extends Cubit<${pascalCase}State> {
-  final Get${pascalCase}sUseCase _get${pascalCase}sUseCase;
-
-  ${pascalCase}Cubit({required Get${pascalCase}sUseCase get${pascalCase}sUseCase})
-      : _get${pascalCase}sUseCase = get${pascalCase}sUseCase,
-        super(const ${pascalCase}Initial());
-
-  List<$pascalCase> temp${pascalCase}s = [];
-
-  Future<void> get${pascalCase}s() async {
-    debugPrint('$snakeCase-debug: $snakeCase-cubit get${pascalCase}s');
-
-    emit(const ${pascalCase}Loading());
-
-    final result = await _get${pascalCase}sUseCase();
-    result.fold((failure) {
-      final errors = ${pascalCase}Error(failure.message, failure.statusCode);
-      emit(errors);
-    }, (success) {
-      temp${pascalCase}s = success;
-      final loaded = ${pascalCase}Loaded(success);
-      emit(loaded);
-    });
-  }
-}''';
-
-    await _writeFile(
-      'lib/presentation/cubit/$snakeCase/${snakeCase}_cubit.dart',
-      cubitContent,
-    );
-
-    final stateContent =
-        '''part of '${snakeCase}_cubit.dart';
-
-sealed class ${pascalCase}State extends Equatable {
-  const ${pascalCase}State();
-
-  @override
-  List<Object?> get props => [];
-}
-
-final class ${pascalCase}Initial extends ${pascalCase}State {
-  const ${pascalCase}Initial();
-}
-
-final class ${pascalCase}Loading extends ${pascalCase}State {
-  const ${pascalCase}Loading();
-}
-
-final class ${pascalCase}Error extends ${pascalCase}State {
-  final String message;
-  final int statusCode;
-  
-  const ${pascalCase}Error(this.message, this.statusCode);
-  
-  @override
-  List<Object?> get props => [message, statusCode];
-}
-
-final class ${pascalCase}Loaded extends ${pascalCase}State {
-  final List<$pascalCase> ${camelCase}s;
-  
-  const ${pascalCase}Loaded(this.${camelCase}s);
-  
-  @override
-  List<Object?> get props => [${camelCase}s];
-}''';
-
-    await _writeFile(
-      'lib/presentation/cubit/$snakeCase/${snakeCase}_state.dart',
-      stateContent,
-    );
-  }
-
-  static Future<void> _generateScreen(
-    String pascalCase,
-    String snakeCase,
-  ) async {
-    final content =
-        '''import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../domain/entities/$snakeCase.dart';
-import '../../cubit/$snakeCase/${snakeCase}_cubit.dart';
-import '../../widgets/custom_text.dart';
-import '../../widgets/fetch_error_text.dart';
-import '../../widgets/loading_widget.dart';
-
-class ${pascalCase}Screen extends StatefulWidget {
-  const ${pascalCase}Screen({super.key});
-
-  @override
-  State<${pascalCase}Screen> createState() => _${pascalCase}ScreenState();
-}
-
-class _${pascalCase}ScreenState extends State<${pascalCase}Screen> {
-  late ${pascalCase}Cubit ${snakeCase}Cubit;
-
-  @override
-  void initState() {
-    super.initState();
-    ${snakeCase}Cubit = context.read<${pascalCase}Cubit>();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: CustomText(text: '${pascalCase}s'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              debugPrint('$snakeCase-debug: user triggered get${pascalCase}s function');
-              ${snakeCase}Cubit.get${pascalCase}s();
-            },
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
-      ),
-      body: BlocBuilder<${pascalCase}Cubit, ${pascalCase}State>(
-        builder: (context, state) {
-          if (state is ${pascalCase}Loading) {
-            return const LoadingWidget();
-          } else if (state is ${pascalCase}Error) {
-            return FetchErrorText(text: state.message);
-          } else if (state is ${pascalCase}Loaded) {
-            return Loaded${pascalCase}View(${snakeCase}s: state.${snakeCase}s);
-          } else {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CustomText(text: 'Tap the button to load ${snakeCase}s'),
-                  const SizedBox(height: 20),
-                  if (${snakeCase}Cubit.temp${pascalCase}s.isNotEmpty)
-                    Loaded${pascalCase}View(${snakeCase}s: ${snakeCase}Cubit.temp${pascalCase}s),
-                ],
-              ),
-            );
-          }
-        },
-      ),
-    );
-  }
-}
-
-class Loaded${pascalCase}View extends StatelessWidget {
-  const Loaded${pascalCase}View({super.key, this.${snakeCase}s});
-
-  final List<$pascalCase>? ${snakeCase}s;
-
-  @override
-  Widget build(BuildContext context) {
-    if (${snakeCase}s?.isNotEmpty ?? false) {
-      return ListView.builder(
-        itemCount: ${snakeCase}s?.length,
-        itemBuilder: (context, index) {
-          final item = ${snakeCase}s?[index];
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomText(text: 'ID: \${item?.id}'),
-                    const SizedBox(height: 4),
-                    CustomText(text: 'Name: \${item?.name}'),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      );
+  Future<Either<Failure, $entityClass>> get${pascalFeatureName}Data() async {
+    if (await networkInfo.isConnected) {
+      try {
+        final remoteData = await remoteDataSource.get${pascalFeatureName}Data();
+        final model = $modelClass.fromMap(remoteData);
+        final entity = model.toDomain();
+        
+        // Cache the data
+        await localDataSource.cache${pascalFeatureName}Data(remoteData);
+        
+        return Right(entity);
+      } on ServerException catch (e) {
+        return Left(ServerFailure(e.message, e.statusCode));
+      }
     } else {
-      return const FetchErrorText(text: 'No ${snakeCase}s found');
+      try {
+        final localData = await localDataSource.get${pascalFeatureName}Data();
+        final model = $modelClass.fromMap(localData);
+        final entity = model.toDomain();
+        
+        return Right(entity);
+      } on CacheException {
+        return Left(CacheFailure('No cached data available'));
+      }
     }
   }
 }''';
-
-    await _writeFile(
-      'lib/presentation/screens/$snakeCase/${snakeCase}_screen.dart',
-      content,
-    );
   }
 
-  static Future<void> _writeFile(String path, String content) async {
-    final file = File(path);
-    await file.writeAsString(content);
+  // Helper methods
+  static String _convertModelTypeToEntityType(String modelType) {
+    if (modelType.contains('List<') && modelType.contains('Model')) {
+      return modelType.replaceAll('Model', 'Entity');
+    }
+    if (modelType.contains('Model')) {
+      return modelType.replaceAll('Model', 'Entity');
+    }
+    return modelType;
   }
 
-  static String _toPascalCase(String input) {
-    return input
-        .split('_')
-        .map((word) => word[0].toUpperCase() + word.substring(1))
-        .join('');
-  }
+  static String _generatePropertyMappings(
+      List<PropertyInfo> sourceProps,
+      List<PropertyInfo> targetProps,
+      ) {
+    final mappings = <String>[];
 
-  static String _toSnakeCase(String input) {
-    return input.toLowerCase().replaceAll(' ', '_');
-  }
+    for (final targetProp in targetProps) {
+      final sourceProp = sourceProps.firstWhere(
+            (p) => p.name == targetProp.name,
+        orElse: () => PropertyInfo(type: 'dynamic', name: targetProp.name),
+      );
 
-  static String _toCamelCase(String input) {
-    final pascalCase = _toPascalCase(input);
-    return pascalCase[0].toLowerCase() + pascalCase.substring(1);
+      if (sourceProp.type.contains('List<') && sourceProp.type.contains('Model') &&
+          targetProp.type.contains('List<') && targetProp.type.contains('Entity')) {
+        mappings.add('      ${targetProp.name}: ${sourceProp.name}?.map((item) => item.toDomain()).toList(),');
+      } else if (sourceProp.type.contains('Model') && targetProp.type.contains('Entity')) {
+        mappings.add('      ${targetProp.name}: ${sourceProp.name}?.toDomain(),');
+      } else {
+        mappings.add('      ${targetProp.name}: ${sourceProp.name},');
+      }
+    }
+
+    return mappings.join('\n');
   }
 }
 
-void main(List<String> args) async {
-  if (args.isEmpty) {
-    debugPrint('❌ Please provide a feature name');
-    debugPrint('Usage: dart tool/code_generator.dart <feature_name>');
-    debugPrint('Example: dart tool/code_generator.dart user_profile');
-    return;
-  }
+// Data classes
+class ModelAnalysis {
+  final String className;
+  final String featureName;
+  final List<PropertyInfo> properties;
+  final String filePath;
 
-  final featureName = args[0];
-  await CodeGenerator.generateFeature(featureName);
+  ModelAnalysis({
+    required this.className,
+    required this.featureName,
+    required this.properties,
+    required this.filePath,
+  });
+}
+
+class EntityAnalysis {
+  final String className;
+  final String featureName;
+  final List<PropertyInfo> properties;
+  final String filePath;
+
+  EntityAnalysis({
+    required this.className,
+    required this.featureName,
+    required this.properties,
+    required this.filePath,
+  });
+}
+
+class RepositoryAnalysis {
+  final String className;
+  final String featureName;
+  final List<String> methods;
+  final String filePath;
+
+  RepositoryAnalysis({
+    required this.className,
+    required this.featureName,
+    required this.methods,
+    required this.filePath,
+  });
+}
+
+class PropertyInfo {
+  final String type;
+  final String name;
+
+  PropertyInfo({required this.type, required this.name});
+}
+
+// Main function
+void main(List<String> args) async {
+  await UnifiedGenerator.showMainMenu();
 }

@@ -11,11 +11,13 @@ class RemoteUrls {
 
   // ── Root & base used only for asset URLs ──────────────────────────────────
   // Note: the API base URL itself is now controlled by EnvConfig.baseUrl.
-  static const String _rootUrl = 'https://www.aarcorealty.in/';
+  static const String _rootUrl = 'http://192.168.0.103:3000/';
 
-  static String get getDevUrl => _rootUrl;
-  static String get getStagingUrl => _rootUrl;
-  static String get getProductionUrl => _rootUrl;
+  static const String baseUrl = '${_rootUrl}api/';
+
+  static String get getDevUrl => baseUrl;
+  static String get getStagingUrl => baseUrl;
+  static String get getProductionUrl => baseUrl;
 
   // ── Auth endpoints ────────────────────────────────────────────────────────
   static const String register = 'store-register';
