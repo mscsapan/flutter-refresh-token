@@ -35,7 +35,7 @@ class RemoteUrls {
   static String changePassword(String token) => 'user/update-password?token=$token';
 
   // ── Settings ──────────────────────────────────────────────────────────────
-  static const String websiteSetup = 'website-setup';
+  static const String websiteSetup = 'get-setting';
 
   // ── Asset helpers (absolute, not sent through Dio) ────────────────────────
   /// Converts a server-relative image path to a fully-qualified URL.

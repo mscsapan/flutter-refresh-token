@@ -2,15 +2,16 @@ import 'package:dartz/dartz.dart';
 
 import '../../../core/failures/failures.dart';
 import '../../../core/usecases/usecase.dart';
+import '../../entities/setting/setting_entity.dart';
 import '../../repositories/setting_repository.dart';
 
-class GetSettingUseCase implements UseCase<dynamic, NoParams> {
+class GetSettingUseCase implements OptionalParamUseCase<SettingEntity?, NoParams> {
   final SettingRepository repository;
 
   GetSettingUseCase(this.repository);
 
   @override
-  Future<Either<Failure, dynamic>> call(NoParams params) async {
+  Future<Either<Failure, SettingEntity?>> call([NoParams? params]) async {
     return await repository.getSetting();
   }
 }

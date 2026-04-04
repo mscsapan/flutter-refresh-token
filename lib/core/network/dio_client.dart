@@ -127,19 +127,19 @@ class DioClient {
     );
 
     // ── 3. Pretty logger — only in non-production ─────────────────────────
-    if (EnvConfig.enableDebugMode) {
-      dio.interceptors.add(
-        PrettyDioLogger(
-          requestHeader: true,
-          requestBody: true,
-          responseBody: true,
-          responseHeader: false,
-          error: true,
-          compact: true,
-          //enabled: kDebugMode,
-        ),
-      );
-    }
+    // if (EnvConfig.enableDebugMode) {
+    //   dio.interceptors.add(
+    //     PrettyDioLogger(
+    //       requestHeader: false,
+    //       requestBody: false,
+    //       responseBody: true,
+    //       responseHeader: false,
+    //       error: true,
+    //       compact: false,
+    //       //enabled: kDebugMode,
+    //     ),
+    //   );
+    // }
 
     // ── 4. Generic error interceptor for structured logging ────────────────
     dio.interceptors.add(

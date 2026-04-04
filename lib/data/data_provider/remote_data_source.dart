@@ -19,7 +19,7 @@ abstract class RemoteDataSource {
   Future<dynamic> refreshToken(String refreshToken);
 
   /// Fetches global application/website settings.
-  Future<dynamic> getSetting();
+  Future getSetting();
 }
 
 // ---------------------------------------------------------------------------
@@ -62,7 +62,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   // ── Settings ──────────────────────────────────────────────────────────────
 
   @override
-  Future<dynamic> getSetting() {
+  Future getSetting() {
     return DioNetworkParser.call(
       () => dio.get(RemoteUrls.websiteSetup),
     );

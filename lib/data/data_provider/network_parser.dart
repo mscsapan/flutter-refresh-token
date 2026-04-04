@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/exceptions/exceptions.dart';
 import '../models/errors/errors_model.dart';
@@ -97,7 +99,10 @@ class DioNetworkParser {
     final statusCode = response.statusCode ?? 0;
     final data = response.data;
 
-    log('HTTP $statusCode', name: _tag);
+    if(kDebugMode){
+      log('HTTP $statusCode', name: _tag);
+      log('$data',name: _tag);
+    }
 
     switch (statusCode) {
       // ── Success ────────────────────────────────────────────────────────────
