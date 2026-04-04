@@ -71,17 +71,4 @@ class NavigationServiceExamples {
       ),
     );
   }
-  
-  // Snackbar examples
-  static void showSuccessMessage() {
-    NavigationService.showSuccessSnackbar('Login successful!');
-  }
-  
-  static void showErrorMessage() {
-    NavigationService.showErrorSnackbar('Login failed. Please try again.');
-  }
-  
-  static void showInfoMessage() {
-    NavigationService.showSnackbar('Please check your internet connection');
-  }
 }

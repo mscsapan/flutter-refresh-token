@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../data/models/setting/setting_model.dart';
+
 abstract class SettingState extends Equatable {
   const SettingState();
 
@@ -16,9 +18,9 @@ class SettingLoading extends SettingState {
 }
 
 class SettingLoaded extends SettingState {
-  final dynamic settings;
+  final SettingModel? settings;
 
-  const SettingLoaded({required this.settings});
+  const SettingLoaded(this.settings);
 
   @override
   List<Object?> get props => [settings];

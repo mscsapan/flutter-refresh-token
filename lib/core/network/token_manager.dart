@@ -62,10 +62,7 @@ class TokenManager {
   // ── Save both at once ────────────────────────────────────────────────────
 
   /// Convenience method to persist both tokens after login / token refresh.
-  Future<void> saveTokens({
-    required String accessToken,
-    required String refreshToken,
-  }) async {
+  Future<void> saveTokens({required String accessToken, required String refreshToken}) async {
     await Future.wait([
       saveAccessToken(accessToken),
       saveRefreshToken(refreshToken),

@@ -11,6 +11,7 @@ class RemoteUrls {
 
   // ── Root & base used only for asset URLs ──────────────────────────────────
   // Note: the API base URL itself is now controlled by EnvConfig.baseUrl.
+  // static const String _rootUrl = 'https://server.discountbazar.ae/';
   static const String _rootUrl = 'http://192.168.0.103:3000/';
 
   static const String baseUrl = '${_rootUrl}api/';
