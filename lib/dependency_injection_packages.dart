@@ -3,8 +3,6 @@ export 'core/failures/failures.dart';
 export 'core/usecases/usecase.dart';
 
 // Domain layer exports
-export 'domain/entities/auth_response.dart';
-export 'domain/entities/user.dart';
 export 'domain/repositories/auth_repository.dart';
 export 'domain/repositories/setting_repository.dart';
 export 'domain/usecases/auth/auth_usecases.dart';

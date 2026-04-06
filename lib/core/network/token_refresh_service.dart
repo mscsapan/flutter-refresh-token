@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 
 import '../../data/data_provider/network_parser.dart';
 import '../../data/data_provider/remote_url.dart';
-import '../../data/models/auth/user_response_model.dart';
+import '../../data/models/auth/login_response_model.dart';
 import 'token_manager.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -89,7 +89,7 @@ class TokenRefreshService {
       );
 
       // ── Parse with UserResponseModel — same as login / other auth calls ─
-      final userResponse = UserResponseModel.fromMap(
+      final userResponse = LoginResponseModel.fromMap(
         result is Map<String, dynamic> ? result : {},
       );
 

@@ -9,7 +9,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 import '../bloc/auth/login_bloc.dart';
-import '../routes/route_names.dart';
 import '../widgets/custom_text.dart';
 import 'constraints.dart';
 
@@ -175,7 +174,7 @@ class Utils {
   }
 
 
-  static BlocListener<LoginBloc, LoginState> logoutListener() {
+/*  static BlocListener<LoginBloc, LoginState> logoutListener() {
     return BlocListener<LoginBloc, LoginState>(
       listener: (context, state) {
         if (state is LogoutLoading) {
@@ -218,7 +217,7 @@ class Utils {
       },
       child: child,
     );
-  }
+  }*/
 
   static Future<void> logoutFunction(BuildContext context) async {
     context.read<LoginBloc>().add(const LoginEventLogout());

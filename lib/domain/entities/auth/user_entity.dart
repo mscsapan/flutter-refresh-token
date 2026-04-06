@@ -1,6 +1,9 @@
 import 'package:equatable/equatable.dart';
 
-class User extends Equatable {
+/// Domain Entity for USER
+/// 
+/// This represents the core business object in the domain layer.
+class UserEntity extends Equatable {
   final int id;
   final String name;
   final String email;
@@ -8,7 +11,7 @@ class User extends Equatable {
   final String image;
   final int status;
 
-  const User({
+  const UserEntity({
     required this.id,
     required this.name,
     required this.email,
@@ -17,7 +20,7 @@ class User extends Equatable {
     required this.status,
   });
 
-  User copyWith({
+  UserEntity copyWith({
     int? id,
     String? name,
     String? email,
@@ -25,7 +28,7 @@ class User extends Equatable {
     String? image,
     int? status,
   }) {
-    return User(
+    return UserEntity(
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
@@ -36,5 +39,10 @@ class User extends Equatable {
   }
 
   @override
-  List<Object> get props => [id, name, email, phone, image, status];
+  List<Object?> get props => [id, name, email, phone, image, status];
+
+  @override
+  String toString() {
+    return 'UserEntity{id: \$id, name: \$name, email: \$email, phone: \$phone, image: \$image, status: \$status}';
+  }
 }

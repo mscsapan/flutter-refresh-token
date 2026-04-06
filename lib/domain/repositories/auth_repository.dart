@@ -1,48 +1,28 @@
 import 'package:dartz/dartz.dart';
 
 import '../../core/failures/failures.dart';
-import '../entities/auth_response.dart';
+import '../../data/models/auth/user_model.dart';
+import '../../data/models/auth/user_register_model.dart';
+import '../entities/auth/login_response_entity.dart';
 
 abstract class AuthRepository {
-  Future<Either<Failure, AuthResponse>> login({
-    required String email,
-    required String password,
-  });
+
+  Future<Either<Failure, LoginResponseEntity?>> login(UserModel? params);
 
   /// Logs the user out (token is auto-attached by the interceptor).
   Future<Either<Failure, String>> logout();
 
-  Either<Failure, AuthResponse> getExistingUserInfo();
+  Either<Failure, LoginResponseEntity?> getExistingUserInfo();
 
-  Future<Either<Failure, void>> saveCredentials({
-    required String email,
-    required String password,
-  });
-
-  Future<Either<Failure, void>> removeCredentials();
 
   /// Refreshes the access token using the stored refresh token.
-  Future<Either<Failure, AuthResponse>> refreshToken();
+  Future<Either<Failure, LoginResponseEntity?>> refreshToken(UserModel? params);
 
   // Future authentication methods (for extensibility)
-  Future<Either<Failure, AuthResponse>> register({
-    required String name,
-    required String email,
-    required String password,
-    required String phone,
-  });
+  Future<Either<Failure, LoginResponseEntity?>> register(UserRegisterModel? body);
 
-  Future<Either<Failure, String>> forgotPassword({required String email});
+  Future<Either<Failure, LoginResponseEntity?>> forgotPassword(UserRegisterModel? body);
 
-  Future<Either<Failure, String>> resetPassword({
-    required String email,
-    required String token,
-    required String password,
-  });
+  Future<Either<Failure, LoginResponseEntity?>> resetPassword(UserRegisterModel? body);
 
-  Future<Either<Failure, AuthResponse>> updateProfile({
-    String? name,
-    String? phone,
-    String? image,
-  });
 }

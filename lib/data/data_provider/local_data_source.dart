@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/exceptions/exceptions.dart';
 import '../../presentation/utils/k_string.dart';
-import '../models/auth/user_response_model.dart';
+import '../models/auth/login_response_model.dart';
 
 // ---------------------------------------------------------------------------
 // Abstract contract
@@ -18,12 +18,12 @@ abstract class LocalDataSource {
   Future<bool> cachedOnBoarding();
 
   /// Persists [userResponseModel] to local storage.
-  Future<bool> cacheUserResponse(UserResponseModel userResponseModel);
+  Future<bool> cacheUserResponse(LoginResponseModel? userResponseModel);
 
   /// Returns the previously cached user info.
   ///
   /// Throws [DatabaseException] if no user has been cached.
-  UserResponseModel getExistingUserInfo();
+  LoginResponseModel getExistingUserInfo();
 
   /// Removes the cached user response (on logout).
   Future<bool> clearUserResponse();
@@ -78,17 +78,17 @@ class LocalDataSourceImpl implements LocalDataSource {
   // ── User session ─────────────────────────────────────────────────────────
 
   @override
-  Future<bool> cacheUserResponse(UserResponseModel userResponseModel) =>
+  Future<bool> cacheUserResponse(LoginResponseModel? userResponseModel) =>
       sharedPreferences.setString(
         KString.getExistingUserResponseKey,
-        userResponseModel.toJson(),
+        userResponseModel?.toJson()??'',
       );
 
   @override
-  UserResponseModel getExistingUserInfo() {
+  LoginResponseModel getExistingUserInfo() {
     final jsonData =
         sharedPreferences.getString(KString.getExistingUserResponseKey);
-    if (jsonData != null) return UserResponseModel.fromJson(jsonData);
+    if (jsonData != null) return LoginResponseModel.fromJson(jsonData);
     throw const DatabaseException('No cached user found');
   }
 

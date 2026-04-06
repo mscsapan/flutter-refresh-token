@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../models/auth/login_model.dart';
+import '../models/auth/user_model.dart';
 import 'network_parser.dart';
 import 'remote_url.dart';
 
@@ -10,13 +10,13 @@ import 'remote_url.dart';
 
 abstract class RemoteDataSource {
   /// Authenticates the user with [body] credentials.
-  Future<dynamic> login(LoginModel body);
+  Future login(UserModel? body);
 
   /// Logs the user out on the server side.
-  Future<dynamic> logout();
+  Future logout();
 
   /// Requests new access + refresh tokens using a valid refresh token.
-  Future<dynamic> refreshToken(String refreshToken);
+  Future refreshToken(String refreshToken);
 
   /// Fetches global application/website settings.
   Future getSetting();
@@ -35,9 +35,9 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   // ── Auth ──────────────────────────────────────────────────────────────────
 
   @override
-  Future<dynamic> login(LoginModel body) {
+  Future<dynamic> login(UserModel? body) {
     return DioNetworkParser.call(
-      () => dio.post(RemoteUrls.login, data: body.toMap()),
+      () => dio.post(RemoteUrls.login, data: body?.toMap()??{}),
     );
   }
 
@@ -62,7 +62,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   // ── Settings ──────────────────────────────────────────────────────────────
 
   @override
-  Future getSetting() {
+  Future<dynamic> getSetting() {
     return DioNetworkParser.call(
       () => dio.get(RemoteUrls.websiteSetup),
     );

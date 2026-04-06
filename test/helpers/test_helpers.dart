@@ -1,11 +1,11 @@
+import 'package:bloc_clean_architecture/data/models/auth/login_response_model.dart';
+import 'package:bloc_clean_architecture/data/models/auth/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dartz/dartz.dart';
 
-import 'package:bloc_clean_architecture/domain/entities/auth_response.dart';
-import 'package:bloc_clean_architecture/domain/entities/user.dart';
 
 /// Test data constants and helper objects
 class TestData {
@@ -14,7 +14,7 @@ class TestData {
   static const testPassword = 'password123';
   static const testToken = 'test_access_token_123';
   
-  static const testUser = User(
+  static const testUser = UserModel(
     id: 1,
     name: 'Test User',
     email: testEmail,
@@ -23,7 +23,7 @@ class TestData {
     image: '',
   );
   
-  static const testAuthResponse = AuthResponse(
+  static const testAuthResponse = LoginResponseModel(
     accessToken: testToken,
     tokenType: 'Bearer',
     isVendor: 0,
@@ -32,7 +32,7 @@ class TestData {
   );
   
   // Different test scenarios
-  static const testVendorUser = User(
+  static const testVendorUser = UserModel(
     id: 2,
     name: 'Vendor User',
     email: 'vendor@example.com',
@@ -41,7 +41,7 @@ class TestData {
     image: '',
   );
   
-  static const testVendorAuthResponse = AuthResponse(
+  static const testVendorAuthResponse = LoginResponseModel(
     accessToken: 'vendor_token_456',
     tokenType: 'Bearer',
     isVendor: 1,

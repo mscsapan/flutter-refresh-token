@@ -2,50 +2,44 @@ import 'package:dartz/dartz.dart';
 
 import '../../core/failures/failures.dart';
 import '../../core/network/token_manager.dart';
-import '../../domain/entities/auth_response.dart';
+import '../../domain/entities/auth/login_response_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../core/exceptions/exceptions.dart';
 import '../data_provider/local_data_source.dart';
 import '../data_provider/remote_data_source.dart';
-import '../mappers/auth_mappers.dart';
-import '../models/auth/login_model.dart';
-import '../models/auth/user_response_model.dart';
+import '../mappers/auth/login_response_mapper.dart';
+import '../models/auth/login_response_model.dart';
+import '../models/auth/user_model.dart';
+import '../models/auth/user_register_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final RemoteDataSource remoteDataSources;
   final LocalDataSource localDataSources;
   final TokenManager tokenManager;
 
-  AuthRepositoryImpl({
-    required this.remoteDataSources,
-    required this.localDataSources,
-    required this.tokenManager,
-  });
+  AuthRepositoryImpl({required this.remoteDataSources, required this.localDataSources, required this.tokenManager});
 
   @override
-  Future<Either<Failure, AuthResponse>> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<Either<Failure, LoginResponseEntity?>> login(UserModel? body) async {
     try {
-      final loginModel = LoginModel(email: email, password: password);
-      final result = await remoteDataSources.login(loginModel);
 
-      // Parse the response into a model
-      final userResponse = UserResponseModel.fromMap(
-        result is Map<String, dynamic> ? result : {},
-      );
+      final result = await remoteDataSources.login(body);
+
+      // Safe null check
+      if(result == null) return Right(null);
+
+      final loginResponse = LoginResponseModel.fromMap(result['data']).toDomain();
 
       // Cache user info locally
-      await localDataSources.cacheUserResponse(userResponse);
+      await localDataSources.cacheUserResponse(loginResponse.toData());
 
       // Save tokens securely for the interceptor
       await tokenManager.saveTokens(
-        accessToken: userResponse.accessToken,
-        refreshToken: userResponse.refreshToken,
+        accessToken: loginResponse.accessToken??'',
+        refreshToken: loginResponse.refreshToken??'',
       );
 
-      return Right(userResponse.toDomain());
+      return Right(loginResponse);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, e.statusCode));
     } on InvalidAuthDataException catch (e) {
@@ -55,8 +49,9 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+
   @override
-  Either<Failure, AuthResponse> getExistingUserInfo() {
+  Either<Failure, LoginResponseEntity?> getExistingUserInfo() {
     try {
       final result = localDataSources.getExistingUserInfo();
       return Right(result.toDomain());
@@ -66,6 +61,8 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(DatabaseFailure('Failed to get user info'));
     }
   }
+
+
 
   @override
   Future<Either<Failure, String>> logout() async {
@@ -82,7 +79,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, AuthResponse>> refreshToken() async {
+  Future<Either<Failure, LoginResponseEntity?>> refreshToken(UserModel? params) async {
     try {
       final currentRefreshToken = await tokenManager.refreshToken;
 
@@ -92,22 +89,22 @@ class AuthRepositoryImpl implements AuthRepository {
 
       final result = await remoteDataSources.refreshToken(currentRefreshToken);
 
-      final userResponse = UserResponseModel.fromMap(
-        result is Map<String, dynamic> ? result : {},
-      );
+
+
+      final loginResponse = LoginResponseModel.fromMap(result['data']).toDomain();
 
       // Update cached user info
-      await localDataSources.cacheUserResponse(userResponse);
+      await localDataSources.cacheUserResponse(loginResponse.toData());
 
       // Save new tokens
       await tokenManager.saveTokens(
-        accessToken: userResponse.accessToken,
-        refreshToken: userResponse.refreshToken.isNotEmpty
-            ? userResponse.refreshToken
+        accessToken: loginResponse.accessToken,
+        refreshToken: loginResponse.refreshToken.isNotEmpty
+            ? loginResponse.refreshToken
             : currentRefreshToken,
       );
 
-      return Right(userResponse.toDomain());
+      return Right(loginResponse);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, e.statusCode));
     } catch (e) {
@@ -115,11 +112,9 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, void>> saveCredentials({
-    required String email,
-    required String password,
-  }) async {
+ /* @override
+  Future<Either<Failure, void>> saveCredentials(
+      {required String email, required String password}) async {
     try {
       await localDataSources.saveCredentials(email: email, password: password);
       return const Right(null);
@@ -141,14 +136,10 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(DatabaseFailure('Failed to remove credentials'));
     }
   }
+*/
 
   @override
-  Future<Either<Failure, AuthResponse>> register({
-    required String name,
-    required String email,
-    required String password,
-    required String phone,
-  }) async {
+  Future<Either<Failure, LoginResponseEntity?>> register(UserRegisterModel? body) async {
     try {
       return Left(ServerFailure('Register not implemented yet', 501));
     } on ServerException catch (e) {
@@ -159,9 +150,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, String>> forgotPassword({
-    required String email,
-  }) async {
+  Future<Either<Failure, LoginResponseEntity?>> forgotPassword(UserRegisterModel? body) async {
     try {
       return Left(ServerFailure('Forgot password not implemented yet', 501));
     } on ServerException catch (e) {
@@ -172,32 +161,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, String>> resetPassword({
-    required String email,
-    required String token,
-    required String password,
-  }) async {
+  Future<Either<Failure, LoginResponseEntity?>> resetPassword(UserRegisterModel? body) async {
     try {
       return Left(ServerFailure('Reset password not implemented yet', 501));
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, e.statusCode));
     } catch (e) {
       return Left(ServerFailure('Reset password failed', 500));
-    }
-  }
-
-  @override
-  Future<Either<Failure, AuthResponse>> updateProfile({
-    String? name,
-    String? phone,
-    String? image,
-  }) async {
-    try {
-      return Left(ServerFailure('Update profile not implemented yet', 501));
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message, e.statusCode));
-    } catch (e) {
-      return Left(ServerFailure('Update profile failed', 500));
     }
   }
 }

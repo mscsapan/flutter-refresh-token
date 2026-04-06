@@ -1,32 +1,36 @@
 import 'package:equatable/equatable.dart';
-import 'user.dart';
 
-class AuthResponse extends Equatable {
+import 'user_entity.dart';
+
+/// Domain Entity for USERRESPONSE
+/// 
+/// This represents the core business object in the domain layer.
+class LoginResponseEntity extends Equatable {
   final String accessToken;
   final String refreshToken;
   final String tokenType;
   final int isVendor;
   final int expireIn;
-  final User? user;
+  final UserEntity? user;
 
-  const AuthResponse({
+  const LoginResponseEntity({
     required this.accessToken,
-    this.refreshToken = '',
+    required this.refreshToken,
     required this.tokenType,
     required this.isVendor,
     required this.expireIn,
     required this.user,
   });
 
-  AuthResponse copyWith({
+  LoginResponseEntity copyWith({
     String? accessToken,
     String? refreshToken,
     String? tokenType,
     int? isVendor,
     int? expireIn,
-    User? user,
+    UserEntity? user,
   }) {
-    return AuthResponse(
+    return LoginResponseEntity(
       accessToken: accessToken ?? this.accessToken,
       refreshToken: refreshToken ?? this.refreshToken,
       tokenType: tokenType ?? this.tokenType,
@@ -37,6 +41,10 @@ class AuthResponse extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [accessToken, refreshToken, tokenType, isVendor, expireIn, user];
+  List<Object?> get props => [accessToken, refreshToken, tokenType, isVendor, expireIn, user];
+
+  @override
+  String toString() {
+    return 'UserResponseModelEntity{accessToken: \$accessToken, refreshToken: \$refreshToken, tokenType: \$tokenType, isVendor: \$isVendor, expireIn: \$expireIn, user: \$user}';
+  }
 }

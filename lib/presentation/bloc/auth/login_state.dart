@@ -16,12 +16,12 @@ class LoginLoading extends LoginState {
 }
 
 class LoginLoaded extends LoginState {
-  final AuthResponse authResponse;
+  final LoginResponseModel? authResponse;
 
   const LoginLoaded({required this.authResponse});
 
   @override
-  List<Object> get props => [authResponse];
+  List<Object?> get props => [authResponse];
 }
 
 class LoginError extends LoginState {
@@ -64,10 +64,7 @@ class LogoutError extends LoginState {
   final String message;
   final int statusCode;
 
-  const LogoutError({
-    required this.message,
-    required this.statusCode,
-  });
+  const LogoutError({required this.message, required this.statusCode});
 
   @override
   List<Object> get props => [message, statusCode];

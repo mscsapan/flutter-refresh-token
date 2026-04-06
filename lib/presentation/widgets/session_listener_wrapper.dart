@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/models/auth/user_model.dart';
 import '../bloc/auth/login_bloc.dart';
 import '../cubit/auth_session/auth_session_cubit.dart';
 import '../cubit/auth_session/auth_session_state.dart';
@@ -46,9 +47,10 @@ class SessionListenerWrapper extends StatelessWidget {
         // ── Legacy: LoginBloc ─────────────────────────────────────────────
         // Kept for backward compatibility — e.g. if LoginEventSessionExpired
         // is dispatched explicitly from somewhere in the UI layer.
-        BlocListener<LoginBloc, LoginState>(
-          listenWhen: (previous, current) => current is SessionExpired,
-          listener: (context, state) {
+        BlocListener<LoginBloc, UserModel>(
+          listenWhen: (previous, current) => current.loginState is SessionExpired,
+          listener: (context, login) {
+            final state = login.loginState;
             if (state is SessionExpired) {
               _handleSessionExpired(context, state.message);
             }
