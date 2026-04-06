@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:bloc_clean_architecture/dependency_injection_packages.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -37,6 +38,7 @@ enum SessionEvent { refreshed, expired }
 class TokenRefreshService {
   final Dio _refreshDio;
   final TokenManager _tokenManager;
+
 
   static const _tag = 'TokenRefreshService';
 
@@ -91,9 +93,9 @@ class TokenRefreshService {
       );
 
       // ── Parse with UserResponseModel — same as login / other auth calls ─
-      final userResponse = LoginResponseModel.fromMap(
-        result is Map<String, dynamic> ? result : {},
-      );
+      final userResponse = LoginResponseModel.fromMap(result);
+
+      debugPrint('======== new token generated========= $userResponse');
 
       if (userResponse.accessToken.isNotEmpty) {
         await _tokenManager.saveTokens(

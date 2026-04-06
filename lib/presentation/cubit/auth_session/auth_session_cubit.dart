@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/network/dio_client.dart';
@@ -70,9 +71,8 @@ class AuthSessionCubit extends Cubit<AuthSessionState> {
 
     if (!success) {
       _performLocalCleanup();
-      emit(const AuthSessionExpired(
-        message: 'Session expired. Please login again.',
-      ));
+      final expiredState = const AuthSessionExpired(message: 'Session expired. Please login again.');
+      emit(expiredState);
     }
 
     return success;

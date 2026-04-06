@@ -4,6 +4,7 @@ import 'package:bloc_clean_architecture/presentation/widgets/primary_button.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/services/navigation_service.dart';
+import '../../routes/route_names.dart';
 import '../../utils/constraints.dart';
 import '../../utils/utils.dart';
 import '../../widgets/custom_form.dart';
@@ -38,10 +39,9 @@ class _AuthScreenState extends State<AuthScreen> {
           final state = login.loginState;
 
           if(state is LoginError){
-            debugPrint('codeeeee ${state.statusCode}');
             NavigationService.errorSnackBar(context, state.message);
           }else if(state is LoginLoaded){
-            debugPrint('loaded ${state.authResponse}');
+            NavigationService.navigateToAndClearStack(RouteNames.homeScreen);
           }
         },
         builder: (context, state) {

@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/failures/failures.dart';
@@ -10,11 +9,10 @@ import '../../../core/network/token_manager.dart';
 import '../../../data/mappers/auth/login_response_mapper.dart';
 import '../../../data/models/auth/login_response_model.dart';
 import '../../../data/models/auth/user_model.dart';
-import '../../../domain/usecases/auth/auth_usecases.dart';
 import '../../../data/models/errors/errors_model.dart';
+import '../../../domain/usecases/auth/auth_usecases.dart';
 
 part 'login_event.dart';
-
 part 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, UserModel> {
@@ -54,6 +52,15 @@ class LoginBloc extends Bloc<LoginEvent, UserModel> {
       log('Existing user loaded: ${success?.toData()}', name: 'saved-user-data');
     });
   }
+
+  // void updateExistingToken(LoginResponseModel ? model) {
+  //   final result = _authUseCases.getExistingUserInfo();
+  //   result.fold((failure) => _user = null, (success) {
+  //     model = success?.toData();
+  //     saveUserData = model;
+  //     log('saved-new-info: $model', name: 'new-info-saved');
+  //   });
+  // }
 
   // Future<void> saveUserCredentials(String email, String password) async {
   //   final params = CredentialsParams(email: email, password: password);
