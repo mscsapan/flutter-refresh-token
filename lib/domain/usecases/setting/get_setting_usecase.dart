@@ -14,4 +14,13 @@ class GetSettingUseCase implements OptionalParamUseCase<SettingEntity?, NoParams
   Future<Either<Failure, SettingEntity?>> call([NoParams? params]) async {
     return await repository.getSetting();
   }
+
+  // Onboarding related methods - not part of UseCase interface
+  Future<Either<Failure, bool>> cachedOnBoarding() async {
+    return await repository.cachedOnBoarding();
+  }
+
+  Either<Failure, bool> checkOnBoarding() {
+    return repository.checkOnBoarding();
+  }
 }

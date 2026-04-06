@@ -5,4 +5,8 @@ import '../entities/setting/setting_entity.dart';
 
 abstract class SettingRepository {
   Future<Either<Failure, SettingEntity?>> getSetting();
+
+  Either<Failure, bool> checkOnBoarding();
+
+  Future<Either<Failure, bool>> cachedOnBoarding();
 }

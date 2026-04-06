@@ -36,4 +36,23 @@ class SettingRepositoryImpl implements SettingRepository {
       return Left(InvalidAuthDataFailure(e.errors));
     }
   }
+
+  @override
+  Future<Either<Failure, bool>> cachedOnBoarding() async {
+    try {
+      final result = await localDataSources.cachedOnBoarding();
+      return Right(result);
+    } on DatabaseException catch (e) {
+      return Left(DatabaseFailure(e.message));
+    }
+  }
+
+  @override
+  Either<Failure, bool> checkOnBoarding() {
+    try {
+      return Right(localDataSources.checkOnBoarding());
+    } on DatabaseException catch (e) {
+      return Left(DatabaseFailure(e.message));
+    }
+  }
 }

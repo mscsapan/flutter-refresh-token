@@ -4,7 +4,6 @@ import 'dart:io';
 ///
 /// Combined generator with numbered menu system and subfolder support
 class UnifiedGenerator {
-
   /// Main menu system
   static Future<void> showMainMenu() async {
     print('');
@@ -77,7 +76,8 @@ class UnifiedGenerator {
     }
 
     stdout.write('Create entity in subfolder? (y/n): ');
-    final useSubfolder = stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
+    final useSubfolder =
+        stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
 
     String? customPath;
     if (!useSubfolder) {
@@ -114,7 +114,8 @@ class UnifiedGenerator {
     }
 
     stdout.write('Create mapper in subfolder? (y/n): ');
-    final useSubfolder = stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
+    final useSubfolder =
+        stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
 
     String? customPath;
     String? subfolderName;
@@ -154,7 +155,8 @@ class UnifiedGenerator {
     }
 
     stdout.write('Create UseCase in subfolder? (y/n): ');
-    final useSubfolder = stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
+    final useSubfolder =
+        stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
 
     String? customPath;
     String? subfolderName;
@@ -193,7 +195,8 @@ class UnifiedGenerator {
     }
 
     stdout.write('Create DataSource in subfolder? (y/n): ');
-    final useSubfolder = stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
+    final useSubfolder =
+        stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
 
     String? customPath;
     String? subfolderName;
@@ -206,7 +209,9 @@ class UnifiedGenerator {
         return;
       }
     } else {
-      stdout.write('Enter custom DataSource path (or press Enter for default): ');
+      stdout.write(
+        'Enter custom DataSource path (or press Enter for default): ',
+      );
       final input = stdin.readLineSync();
       customPath = input?.isEmpty == false ? input : null;
     }
@@ -233,7 +238,8 @@ class UnifiedGenerator {
     }
 
     stdout.write('Create DataSource in subfolder? (y/n): ');
-    final useSubfolder = stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
+    final useSubfolder =
+        stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
 
     String? customPath;
     String? subfolderName;
@@ -246,7 +252,9 @@ class UnifiedGenerator {
         return;
       }
     } else {
-      stdout.write('Enter custom DataSource path (or press Enter for default): ');
+      stdout.write(
+        'Enter custom DataSource path (or press Enter for default): ',
+      );
       final input = stdin.readLineSync();
       customPath = input?.isEmpty == false ? input : null;
     }
@@ -284,7 +292,8 @@ class UnifiedGenerator {
     print('');
 
     stdout.write('Continue? (y/n): ');
-    final confirm = stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
+    final confirm =
+        stdin.readLineSync()?.toLowerCase().startsWith('y') ?? false;
     if (!confirm) {
       print('❌ Operation cancelled');
       return;
@@ -297,10 +306,10 @@ class UnifiedGenerator {
 
   /// Generates an entity from an existing model file
   static Future<void> generateEntityFromModel(
-      String modelPath, {
-        bool useSubfolder = true,
-        String? customEntityPath,
-      }) async {
+    String modelPath, {
+    bool useSubfolder = true,
+    String? customEntityPath,
+  }) async {
     print('🏗️ Generating entity from model: $modelPath');
 
     final modelFile = File(modelPath);
@@ -327,8 +336,11 @@ class UnifiedGenerator {
     if (customEntityPath != null) {
       entityPath = customEntityPath;
     } else if (useSubfolder) {
-      entityPath = 'lib/domain/entities/${analysis.featureName}/${analysis.featureName}_entity.dart';
-      await Directory('lib/domain/entities/${analysis.featureName}').create(recursive: true);
+      entityPath =
+          'lib/domain/entities/${analysis.featureName}/${analysis.featureName}_entity.dart';
+      await Directory(
+        'lib/domain/entities/${analysis.featureName}',
+      ).create(recursive: true);
     } else {
       entityPath = 'lib/domain/entities/${analysis.featureName}_entity.dart';
       await Directory('lib/domain/entities').create(recursive: true);
@@ -345,11 +357,11 @@ class UnifiedGenerator {
 
   /// Generates a mapper from existing model and entity files
   static Future<void> generateMapperFromFiles(
-      String modelPath,
-      String entityPath, {
-        String? customMapperPath,
-        String? subfolderName,
-      }) async {
+    String modelPath,
+    String entityPath, {
+    String? customMapperPath,
+    String? subfolderName,
+  }) async {
     print('🗺️ Generating mapper from model and entity');
     print('   Model: $modelPath');
     print('   Entity: $entityPath');
@@ -383,8 +395,11 @@ class UnifiedGenerator {
     if (customMapperPath != null) {
       mapperPath = customMapperPath;
     } else if (subfolderName != null) {
-      mapperPath = 'lib/data/mappers/$subfolderName/${modelAnalysis.featureName}_mapper.dart';
-      await Directory('lib/data/mappers/$subfolderName').create(recursive: true);
+      mapperPath =
+          'lib/data/mappers/$subfolderName/${modelAnalysis.featureName}_mapper.dart';
+      await Directory(
+        'lib/data/mappers/$subfolderName',
+      ).create(recursive: true);
     } else {
       mapperPath = 'lib/data/mappers/${modelAnalysis.featureName}_mapper.dart';
       await Directory('lib/data/mappers').create(recursive: true);
@@ -401,10 +416,10 @@ class UnifiedGenerator {
 
   /// Generates a use case from an existing repository
   static Future<void> generateUseCaseFromRepository(
-      String repositoryPath, {
-        String? customUseCasePath,
-        String? subfolderName,
-      }) async {
+    String repositoryPath, {
+    String? customUseCasePath,
+    String? subfolderName,
+  }) async {
     print('🎯 Generating UseCase from repository: $repositoryPath');
 
     final repoFile = File(repositoryPath);
@@ -431,11 +446,17 @@ class UnifiedGenerator {
     if (customUseCasePath != null) {
       useCasePath = customUseCasePath;
     } else if (subfolderName != null) {
-      useCasePath = 'lib/domain/use_cases/$subfolderName/${analysis.featureName}_use_case.dart';
-      await Directory('lib/domain/use_cases/$subfolderName').create(recursive: true);
+      useCasePath =
+          'lib/domain/use_cases/$subfolderName/${analysis.featureName}_use_case.dart';
+      await Directory(
+        'lib/domain/use_cases/$subfolderName',
+      ).create(recursive: true);
     } else {
-      useCasePath = 'lib/domain/use_cases/${analysis.featureName}/${analysis.featureName}_use_case.dart';
-      await Directory('lib/domain/use_cases/${analysis.featureName}').create(recursive: true);
+      useCasePath =
+          'lib/domain/use_cases/${analysis.featureName}/${analysis.featureName}_use_case.dart';
+      await Directory(
+        'lib/domain/use_cases/${analysis.featureName}',
+      ).create(recursive: true);
     }
 
     // Generate use case content
@@ -449,11 +470,11 @@ class UnifiedGenerator {
 
   /// Generates a data source from existing model
   static Future<void> generateDataSourceFromModel(
-      String modelPath, {
-        bool isRemote = true,
-        String? customDataSourcePath,
-        String? subfolderName,
-      }) async {
+    String modelPath, {
+    bool isRemote = true,
+    String? customDataSourcePath,
+    String? subfolderName,
+  }) async {
     final sourceType = isRemote ? 'Remote' : 'Local';
     print('🌐 Generating $sourceType DataSource from model: $modelPath');
 
@@ -480,10 +501,14 @@ class UnifiedGenerator {
     if (customDataSourcePath != null) {
       dataSourcePath = customDataSourcePath;
     } else if (subfolderName != null) {
-      dataSourcePath = 'lib/data/data_sources/$subfolderName/${analysis.featureName}_${sourceType.toLowerCase()}_data_source.dart';
-      await Directory('lib/data/data_sources/$subfolderName').create(recursive: true);
+      dataSourcePath =
+          'lib/data/data_sources/$subfolderName/${analysis.featureName}_${sourceType.toLowerCase()}_data_source.dart';
+      await Directory(
+        'lib/data/data_sources/$subfolderName',
+      ).create(recursive: true);
     } else {
-      dataSourcePath = 'lib/data/data_sources/${analysis.featureName}_${sourceType.toLowerCase()}_data_source.dart';
+      dataSourcePath =
+          'lib/data/data_sources/${analysis.featureName}_${sourceType.toLowerCase()}_data_source.dart';
       await Directory('lib/data/data_sources').create(recursive: true);
     }
 
@@ -515,7 +540,9 @@ class UnifiedGenerator {
     }
 
     final featureName = analysis.featureName;
-    print('📋 Generating complete feature set for: ${featureName.toUpperCase()}');
+    print(
+      '📋 Generating complete feature set for: ${featureName.toUpperCase()}',
+    );
 
     // Create directory structure
     await _createFeatureDirectories(featureName);
@@ -525,19 +552,31 @@ class UnifiedGenerator {
     await _generateMapperForFeature(analysis);
     await _generateRepositoryInterfaceForFeature(analysis);
     await _generateRepositoryImplForFeature(analysis);
-    await _generateDataSourceForFeature(analysis, true);  // Remote
+    await _generateDataSourceForFeature(analysis, true); // Remote
     await _generateDataSourceForFeature(analysis, false); // Local
     await _generateUseCaseForFeature(analysis);
 
     print('✅ Complete feature set generated for: ${featureName.toUpperCase()}');
     print('📁 Generated files:');
-    print('   - Entity: lib/domain/entities/$featureName/${featureName}_entity.dart');
-    print('   - Repository Interface: lib/domain/repositories/${featureName}_repository.dart');
-    print('   - UseCase: lib/domain/use_cases/$featureName/${featureName}_use_case.dart');
-    print('   - Repository Impl: lib/data/repositories/${featureName}_repository_impl.dart');
+    print(
+      '   - Entity: lib/domain/entities/$featureName/${featureName}_entity.dart',
+    );
+    print(
+      '   - Repository Interface: lib/domain/repositories/${featureName}_repository.dart',
+    );
+    print(
+      '   - UseCase: lib/domain/use_cases/$featureName/${featureName}_use_case.dart',
+    );
+    print(
+      '   - Repository Impl: lib/data/repositories/${featureName}_repository_impl.dart',
+    );
     print('   - Mapper: lib/data/mappers/${featureName}_mapper.dart');
-    print('   - Remote DataSource: lib/data/data_sources/${featureName}_remote_data_source.dart');
-    print('   - Local DataSource: lib/data/data_sources/${featureName}_local_data_source.dart');
+    print(
+      '   - Remote DataSource: lib/data/data_sources/${featureName}_remote_data_source.dart',
+    );
+    print(
+      '   - Local DataSource: lib/data/data_sources/${featureName}_local_data_source.dart',
+    );
   }
 
   // Helper methods for complete feature generation
@@ -558,58 +597,81 @@ class UnifiedGenerator {
 
   static Future<void> _generateEntityForFeature(ModelAnalysis analysis) async {
     final entityContent = _generateEntityContent(analysis);
-    await File('lib/domain/entities/${analysis.featureName}/${analysis.featureName}_entity.dart')
-        .writeAsString(entityContent);
+    await File(
+      'lib/domain/entities/${analysis.featureName}/${analysis.featureName}_entity.dart',
+    ).writeAsString(entityContent);
   }
 
   static Future<void> _generateMapperForFeature(ModelAnalysis analysis) async {
     // Create mock entity analysis for mapper generation
     final entityAnalysis = EntityAnalysis(
-      className: '${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Entity',
+      className:
+          '${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Entity',
       featureName: analysis.featureName,
-      properties: analysis.properties.map((p) => PropertyInfo(
-        type: _convertModelTypeToEntityType(p.type),
-        name: p.name,
-      )).toList(),
-      filePath: 'lib/domain/entities/${analysis.featureName}/${analysis.featureName}_entity.dart',
+      properties: analysis.properties
+          .map(
+            (p) => PropertyInfo(
+              type: _convertModelTypeToEntityType(p.type),
+              name: p.name,
+            ),
+          )
+          .toList(),
+      filePath:
+          'lib/domain/entities/${analysis.featureName}/${analysis.featureName}_entity.dart',
     );
 
     final mapperContent = _generateMapperContent(analysis, entityAnalysis);
-    await File('lib/data/mappers/${analysis.featureName}_mapper.dart')
-        .writeAsString(mapperContent);
+    await File(
+      'lib/data/mappers/${analysis.featureName}_mapper.dart',
+    ).writeAsString(mapperContent);
   }
 
-  static Future<void> _generateRepositoryInterfaceForFeature(ModelAnalysis analysis) async {
+  static Future<void> _generateRepositoryInterfaceForFeature(
+    ModelAnalysis analysis,
+  ) async {
     final content = _generateRepositoryInterfaceContent(analysis);
-    await File('lib/domain/repositories/${analysis.featureName}_repository.dart')
-        .writeAsString(content);
+    await File(
+      'lib/domain/repositories/${analysis.featureName}_repository.dart',
+    ).writeAsString(content);
   }
 
-  static Future<void> _generateRepositoryImplForFeature(ModelAnalysis analysis) async {
+  static Future<void> _generateRepositoryImplForFeature(
+    ModelAnalysis analysis,
+  ) async {
     final content = _generateRepositoryImplContent(analysis);
-    await File('lib/data/repositories/${analysis.featureName}_repository_impl.dart')
-        .writeAsString(content);
+    await File(
+      'lib/data/repositories/${analysis.featureName}_repository_impl.dart',
+    ).writeAsString(content);
   }
 
-  static Future<void> _generateDataSourceForFeature(ModelAnalysis analysis, bool isRemote) async {
+  static Future<void> _generateDataSourceForFeature(
+    ModelAnalysis analysis,
+    bool isRemote,
+  ) async {
     final content = _generateDataSourceContent(analysis, isRemote);
     final type = isRemote ? 'remote' : 'local';
-    await File('lib/data/data_sources/${analysis.featureName}_${type}_data_source.dart')
-        .writeAsString(content);
+    await File(
+      'lib/data/data_sources/${analysis.featureName}_${type}_data_source.dart',
+    ).writeAsString(content);
   }
 
   static Future<void> _generateUseCaseForFeature(ModelAnalysis analysis) async {
     // Create mock repository analysis for use case generation
     final repoAnalysis = RepositoryAnalysis(
-      className: '${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Repository',
+      className:
+          '${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Repository',
       featureName: analysis.featureName,
-      methods: ['get${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Data'],
-      filePath: 'lib/domain/repositories/${analysis.featureName}_repository.dart',
+      methods: [
+        'get${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Data',
+      ],
+      filePath:
+          'lib/domain/repositories/${analysis.featureName}_repository.dart',
     );
 
     final content = _generateUseCaseContent(repoAnalysis);
-    await File('lib/domain/use_cases/${analysis.featureName}/${analysis.featureName}_use_case.dart')
-        .writeAsString(content);
+    await File(
+      'lib/domain/use_cases/${analysis.featureName}/${analysis.featureName}_use_case.dart',
+    ).writeAsString(content);
   }
 
   // Analysis methods
@@ -623,7 +685,9 @@ class UnifiedGenerator {
       final featureName = className.toLowerCase().replaceAll('model', '');
 
       // Extract properties
-      final propertyMatches = RegExp(r'final\s+([^;]+?)\s+(\w+);').allMatches(content);
+      final propertyMatches = RegExp(
+        r'final\s+([^;]+?)\s+(\w+);',
+      ).allMatches(content);
       final properties = propertyMatches.map((match) {
         final type = match.group(1)!.trim();
         final name = match.group(2)!.trim();
@@ -652,7 +716,9 @@ class UnifiedGenerator {
       final featureName = className.toLowerCase().replaceAll('entity', '');
 
       // Extract properties
-      final propertyMatches = RegExp(r'final\s+([^;]+?)\s+(\w+);').allMatches(content);
+      final propertyMatches = RegExp(
+        r'final\s+([^;]+?)\s+(\w+);',
+      ).allMatches(content);
       final properties = propertyMatches.map((match) {
         final type = match.group(1)!.trim();
         final name = match.group(2)!.trim();
@@ -671,18 +737,26 @@ class UnifiedGenerator {
     }
   }
 
-  static RepositoryAnalysis? _analyzeRepository(String content, String filePath) {
+  static RepositoryAnalysis? _analyzeRepository(
+    String content,
+    String filePath,
+  ) {
     try {
-      final classMatch = RegExp(r'class\s+(\w+)\s+implements').firstMatch(content);
+      final classMatch = RegExp(
+        r'class\s+(\w+)\s+implements',
+      ).firstMatch(content);
       if (classMatch == null) return null;
 
       final className = classMatch.group(1)!;
-      final featureName = className.toLowerCase()
+      final featureName = className
+          .toLowerCase()
           .replaceAll('repositoryimpl', '')
           .replaceAll('repository', '');
 
       // Extract methods
-      final methodMatches = RegExp(r'Future<[^>]+>\s+(\w+)\(').allMatches(content);
+      final methodMatches = RegExp(
+        r'Future<[^>]+>\s+(\w+)\(',
+      ).allMatches(content);
       final methods = methodMatches.map((m) => m.group(1)!).toList();
 
       return RepositoryAnalysis(
@@ -699,7 +773,8 @@ class UnifiedGenerator {
 
   // Content generation methods
   static String _generateEntityContent(ModelAnalysis analysis) {
-    final className = '${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Entity';
+    final className =
+        '${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Entity';
 
     final entityProperties = analysis.properties.map((prop) {
       final entityType = _convertModelTypeToEntityType(prop.type);
@@ -754,7 +829,10 @@ $copyWithAssignments
 }''';
   }
 
-  static String _generateMapperContent(ModelAnalysis modelAnalysis, EntityAnalysis entityAnalysis) {
+  static String _generateMapperContent(
+    ModelAnalysis modelAnalysis,
+    EntityAnalysis entityAnalysis,
+  ) {
     final modelClass = modelAnalysis.className;
     final entityClass = entityAnalysis.className;
     final featureName = modelAnalysis.featureName;
@@ -794,8 +872,10 @@ $entityToModelMappings
 
   static String _generateUseCaseContent(RepositoryAnalysis analysis) {
     final featureName = analysis.featureName;
-    final pascalFeatureName = featureName.split('_').map((e) =>
-    '${e[0].toUpperCase()}${e.substring(1)}').join('');
+    final pascalFeatureName = featureName
+        .split('_')
+        .map((e) => '${e[0].toUpperCase()}${e.substring(1)}')
+        .join('');
     final useCaseClass = 'Get${pascalFeatureName}UseCase';
     final repositoryClass = '${pascalFeatureName}Repository';
     final entityClass = '${pascalFeatureName}Entity';
@@ -822,10 +902,15 @@ class $useCaseClass implements UseCase<$entityClass, NoParams> {
 }''';
   }
 
-  static String _generateDataSourceContent(ModelAnalysis analysis, bool isRemote) {
+  static String _generateDataSourceContent(
+    ModelAnalysis analysis,
+    bool isRemote,
+  ) {
     final featureName = analysis.featureName;
-    final pascalFeatureName = featureName.split('_').map((e) =>
-    '${e[0].toUpperCase()}${e.substring(1)}').join('');
+    final pascalFeatureName = featureName
+        .split('_')
+        .map((e) => '${e[0].toUpperCase()}${e.substring(1)}')
+        .join('');
     final sourceType = isRemote ? 'Remote' : 'Local';
     final abstractClass = '$pascalFeatureName${sourceType}DataSource';
     final implClass = '$pascalFeatureName${sourceType}DataSourceImpl';
@@ -837,10 +922,16 @@ class $useCaseClass implements UseCase<$entityClass, NoParams> {
     return dataSourceContent;
   }
 
-  static String _generateRemoteDataSourceContent(ModelAnalysis analysis, String abstractClass, String implClass) {
+  static String _generateRemoteDataSourceContent(
+    ModelAnalysis analysis,
+    String abstractClass,
+    String implClass,
+  ) {
     final featureName = analysis.featureName;
-    final pascalFeatureName = featureName.split('_').map((e) =>
-    '${e[0].toUpperCase()}${e.substring(1)}').join('');
+    final pascalFeatureName = featureName
+        .split('_')
+        .map((e) => '${e[0].toUpperCase()}${e.substring(1)}')
+        .join('');
 
     return '''import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -886,10 +977,16 @@ class $implClass implements $abstractClass {
 }''';
   }
 
-  static String _generateLocalDataSourceContent(ModelAnalysis analysis, String abstractClass, String implClass) {
+  static String _generateLocalDataSourceContent(
+    ModelAnalysis analysis,
+    String abstractClass,
+    String implClass,
+  ) {
     final featureName = analysis.featureName;
-    final pascalFeatureName = featureName.split('_').map((e) =>
-    '${e[0].toUpperCase()}${e.substring(1)}').join('');
+    final pascalFeatureName = featureName
+        .split('_')
+        .map((e) => '${e[0].toUpperCase()}${e.substring(1)}')
+        .join('');
 
     return '''import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -931,8 +1028,10 @@ class $implClass implements $abstractClass {
 
   static String _generateRepositoryInterfaceContent(ModelAnalysis analysis) {
     final featureName = analysis.featureName;
-    final pascalFeatureName = featureName.split('_').map((e) =>
-    '${e[0].toUpperCase()}${e.substring(1)}').join('');
+    final pascalFeatureName = featureName
+        .split('_')
+        .map((e) => '${e[0].toUpperCase()}${e.substring(1)}')
+        .join('');
     final repositoryClass = '${pascalFeatureName}Repository';
     final entityClass = '${pascalFeatureName}Entity';
 
@@ -951,8 +1050,10 @@ abstract class $repositoryClass {
 
   static String _generateRepositoryImplContent(ModelAnalysis analysis) {
     final featureName = analysis.featureName;
-    final pascalFeatureName = featureName.split('_').map((e) =>
-    '${e[0].toUpperCase()}${e.substring(1)}').join('');
+    final pascalFeatureName = featureName
+        .split('_')
+        .map((e) => '${e[0].toUpperCase()}${e.substring(1)}')
+        .join('');
     final repositoryClass = '${pascalFeatureName}Repository';
     final repositoryImplClass = '${pascalFeatureName}RepositoryImpl';
     final entityClass = '${pascalFeatureName}Entity';
@@ -1024,22 +1125,29 @@ class $repositoryImplClass implements $repositoryClass {
   }
 
   static String _generatePropertyMappings(
-      List<PropertyInfo> sourceProps,
-      List<PropertyInfo> targetProps,
-      ) {
+    List<PropertyInfo> sourceProps,
+    List<PropertyInfo> targetProps,
+  ) {
     final mappings = <String>[];
 
     for (final targetProp in targetProps) {
       final sourceProp = sourceProps.firstWhere(
-            (p) => p.name == targetProp.name,
+        (p) => p.name == targetProp.name,
         orElse: () => PropertyInfo(type: 'dynamic', name: targetProp.name),
       );
 
-      if (sourceProp.type.contains('List<') && sourceProp.type.contains('Model') &&
-          targetProp.type.contains('List<') && targetProp.type.contains('Entity')) {
-        mappings.add('      ${targetProp.name}: ${sourceProp.name}?.map((item) => item.toDomain()).toList(),');
-      } else if (sourceProp.type.contains('Model') && targetProp.type.contains('Entity')) {
-        mappings.add('      ${targetProp.name}: ${sourceProp.name}?.toDomain(),');
+      if (sourceProp.type.contains('List<') &&
+          sourceProp.type.contains('Model') &&
+          targetProp.type.contains('List<') &&
+          targetProp.type.contains('Entity')) {
+        mappings.add(
+          '      ${targetProp.name}: ${sourceProp.name}?.map((item) => item.toDomain()).toList(),',
+        );
+      } else if (sourceProp.type.contains('Model') &&
+          targetProp.type.contains('Entity')) {
+        mappings.add(
+          '      ${targetProp.name}: ${sourceProp.name}?.toDomain(),',
+        );
       } else {
         mappings.add('      ${targetProp.name}: ${sourceProp.name},');
       }

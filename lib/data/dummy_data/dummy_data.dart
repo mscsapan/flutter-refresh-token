@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../presentation/utils/k_images.dart';
+
 class DummyDashboardModel extends Equatable {
   final String image;
   final String name;
@@ -47,5 +49,44 @@ class ProductStatusModel extends Equatable {
 final List<ProductStatusModel> productStatusModel = [
   const ProductStatusModel(id: '1', title: 'Active'),
   const ProductStatusModel(id: '0', title: 'Inactive'),
+];
+
+class OnBoardingData extends Equatable {
+  final String image;
+  final String title;
+  final String subTitle;
+
+  const OnBoardingData({required this.title, required this.image, required this.subTitle});
+
+  @override
+  List<Object?> get props => [image, title,subTitle];
+}
+
+final onBoardingData = <OnBoardingData>[
+  OnBoardingData(
+    image: KImages.defaultImg,
+    // image: 'assets/images/onboarding-01.png',
+    title: 'Welcome to Your Store',
+    subTitle: 'Discover a curated selection of products we know you\'ll love.',
+  ),
+  OnBoardingData(
+    image: KImages.defaultImg,
+    // image: 'assets/images/onboarding-05.jpg',
+    title: 'Fast Delivered Your Product',
+    subTitle: 'Choose a delivery location and get product at your door step',
+  ),
+  OnBoardingData(
+    image: KImages.defaultImg,
+    // image: 'assets/images/onboarding-03.jpg',
+    title: 'Exclusive Deals',
+    subTitle: 'Enjoy member-only discounts and early access to sales.',
+  ),
+  OnBoardingData(
+    image: KImages.defaultImg,
+    // image: 'assets/images/onboarding-04.png',
+    title: 'Discover Your Style',
+    subTitle:
+    'Explore curated collections tailored to your unique taste. Find the perfect pieces to express yourself.',
+  ),
 ];
 
