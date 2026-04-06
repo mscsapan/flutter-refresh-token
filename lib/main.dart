@@ -1,3 +1,4 @@
+import 'package:bloc_clean_architecture/dependency_injection_packages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,32 +44,32 @@ class TemplateProject extends StatelessWidget {
             providers: DInjector.blocProviders,
             child: SessionListenerWrapper(
               child: MaterialApp(
-                navigatorKey: NavigationService.navigatorKey,
-                debugShowCheckedModeBanner: false,
-                onGenerateRoute: RouteNames.generateRoutes,
-                initialRoute: RouteNames.splashScreen,
-                theme: MyTheme.theme,
-                onUnknownRoute: (RouteSettings settings) {
-                  return MaterialPageRoute(
-                    builder: (BuildContext context) {
-                      return Scaffold(
-                        body: FetchErrorText(
-                          text: 'No Route Found ${settings.name}',
-                          textColor: blackColor,
-                        ),
-                      );
-                    },
-                  );
-                },
-                builder: (context, child) {
-                  return MediaQuery(
-                    data: MediaQuery.of(
-                      context,
-                    ).copyWith(textScaler: const TextScaler.linear(1.0)),
-                    child: child ?? SizedBox(),
-                  );
-                },
-              ),
+              navigatorKey: NavigationService.navigatorKey,
+              debugShowCheckedModeBanner: false,
+              onGenerateRoute: RouteNames.generateRoutes,
+              initialRoute: RouteNames.splashScreen,
+              theme: MyTheme.theme,
+              onUnknownRoute: (RouteSettings settings) {
+                return MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return Scaffold(
+                      body: FetchErrorText(
+                        text: 'No Route Found ${settings.name}',
+                        textColor: blackColor,
+                      ),
+                    );
+                  },
+                );
+              },
+              builder: (context, child) {
+                return MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: const TextScaler.linear(1.0)),
+                  child: child ?? SizedBox(),
+                );
+              },
+            ),
             ),
           ),
         );

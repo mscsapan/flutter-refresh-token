@@ -17,7 +17,7 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>{
   late SettingCubit settingCubit;
 
   @override
@@ -36,7 +36,11 @@ class _SplashScreenState extends State<SplashScreen> {
           if (state is SettingError) {
             NavigationService.errorSnackBar(context, state.message);
           } else if (state is SettingLoaded) {
+            if(settingCubit.showOnBoarding){
+            NavigationService.navigateTo(RouteNames.authScreen);
+            }else{
             NavigationService.navigateTo(RouteNames.onBoardingScreen);
+            }
           }
         },
         child: Center(child: CustomText(text: 'Splash Screen')),

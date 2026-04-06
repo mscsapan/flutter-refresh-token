@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/services/navigation_service.dart';
 import '../bloc/internet_status/internet_status_bloc.dart';
 
 /// A widget that **automatically re-fetches data** when internet connectivity
@@ -117,6 +118,8 @@ class _ConnectivityBuilderState extends State<ConnectivityBuilder>
           if (widget.showBanner) {
             _animationController.forward();
           }
+          NavigationService.errorSnackBar(context, 'Your internet connection was lost');
+
         } else if (state is InternetStatusBackState) {
           if (widget.showBanner) {
             _animationController.reverse();
@@ -125,6 +128,7 @@ class _ConnectivityBuilderState extends State<ConnectivityBuilder>
             _wasDisconnected = false;
             widget.onRetry?.call();
           }
+          NavigationService.showSnackBar(context, 'Your internet connection was restore');
         }
       },
       child: widget.showBanner

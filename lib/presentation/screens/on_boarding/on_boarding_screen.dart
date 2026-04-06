@@ -117,14 +117,14 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                       children: [
                         Expanded(flex: 8,child: PrimaryButton(text: 'Skip', onPressed: (){
                           setting.cacheOnBoarding();
-                          NavigationService.navigateToAndClearStack(RouteNames.mainScreen);
+                          NavigationService.navigateToAndClearStack(RouteNames.authScreen);
                           // NavigationService.navigateToAndClearStack(RouteNames.authScreen);
                         },bgColor: borderColor,textColor: blackColor,minimumSize: Size(double.infinity,  36.0),)),
                         Spacer(),
                         Expanded(flex: 8,child: PrimaryButton(text: _currentPage==3?'Get Started':'Next', onPressed: (){
                           if (_currentPage == onBoardingData.length - 1) {
                             setting.cacheOnBoarding();
-                            NavigationService.navigateToAndClearStack(RouteNames.mainScreen);
+                            NavigationService.navigateToAndClearStack(RouteNames.authScreen);
                             // NavigationService.navigateToAndClearStack(RouteNames.authScreen);
                           } else {
                             _pageController.nextPage(duration: kDuration, curve: Curves.easeInOut);

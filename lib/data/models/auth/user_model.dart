@@ -11,6 +11,7 @@ class UserModel extends Equatable {
   final String phone;
   final String image;
   final int status;
+  final bool isShow;
   final UserModel ? userInfo;
   final LoginState loginState;
 
@@ -22,6 +23,7 @@ class UserModel extends Equatable {
     this.image = '',
     this.status = 0,
     this.userInfo,
+    this.isShow = false,
     this.loginState = const LoginInitial(),
   });
 
@@ -32,6 +34,7 @@ class UserModel extends Equatable {
     String? phone,
     String? image,
     int? status,
+    bool ? isShow,
     UserModel? userInfo,
     LoginState ? loginState,
   }) {
@@ -42,6 +45,7 @@ class UserModel extends Equatable {
       phone: phone ?? this.phone,
       image: image ?? this.image,
       status: status ?? this.status,
+      isShow: isShow ?? this.isShow,
       userInfo: userInfo?? this.userInfo,
       loginState: loginState ?? this.loginState,
     );
@@ -86,6 +90,7 @@ class UserModel extends Equatable {
       phone,
       image,
       status,
+      isShow,
       userInfo,
       loginState,
     ];

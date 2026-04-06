@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/services/navigation_service.dart';
 import '../bloc/internet_status/internet_status_bloc.dart';
 
 /// A mixin for [State] classes that need to **automatically reload data**
@@ -66,9 +67,11 @@ mixin ConnectivityAwareMixin<T extends StatefulWidget> on State<T> {
         if (state is InternetStatusLostState) {
           _wasDisconnected = true;
           onConnectionLost();
+          NavigationService.errorSnackBar(context, 'Your internet connection lost');
         } else if (state is InternetStatusBackState && _wasDisconnected) {
           _wasDisconnected = false;
           onConnectionRestored();
+          NavigationService.showSnackBar(context, 'Your internet connection was restored');
         }
       },
       child: child,

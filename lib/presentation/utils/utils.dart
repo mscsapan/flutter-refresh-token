@@ -61,6 +61,15 @@ class Utils {
     FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,4}$'))
   ];
 
+  static FormFieldValidator<String> requiredValidator(String message) {
+    return (value) {
+      if (value == null || value.trim().isEmpty) {
+        return '*$message is required';
+      }
+      return null;
+    };
+  }
+
   static String capitalizeFirstLetter(String input) {
     if (input.isEmpty) {
       return input;

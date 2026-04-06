@@ -5,15 +5,14 @@ import '../utils/constraints.dart';
 import '../utils/utils.dart';
 
 class MyTheme {
-  static final borderRadius = BorderRadius.circular(10.0);
+  static final borderRadius = BorderRadius.circular(6.0);
   static final theme = ThemeData(
-      //brightness: Brightness.light,
+      brightness: Brightness.light,
       primaryColor: whiteColor,
-      scaffoldBackgroundColor: scaffoldBgColor,
-      // bottomSheetTheme: const BottomSheetThemeData(backgroundColor: whiteColor),
-      // colorScheme: const ColorScheme.light(secondary: lightningYellowColor),
+      scaffoldBackgroundColor: whiteColor,
+      bottomSheetTheme: const BottomSheetThemeData(backgroundColor: whiteColor),
       appBarTheme: AppBarTheme(
-        backgroundColor: grayBackgroundColor,
+        backgroundColor: Colors.transparent,
         centerTitle: true,
         scrolledUnderElevation: 0.0,
         titleTextStyle: GoogleFonts.roboto(
@@ -23,22 +22,25 @@ class MyTheme {
       ),
       textTheme: GoogleFonts.robotoTextTheme(
         TextTheme(
-          bodySmall: GoogleFonts.roboto(fontSize: 12, height: 1.83),
+          bodySmall: GoogleFonts.roboto(fontSize: 12.0),
           bodyLarge: GoogleFonts.roboto(
-              fontSize: 16, fontWeight: FontWeight.w500, height: 1.375),
-          bodyMedium: GoogleFonts.roboto(fontSize: 14, height: 1.5714),
-          labelLarge: GoogleFonts.roboto(
-              fontSize: 16, height: 2, fontWeight: FontWeight.w600),
-          titleLarge: GoogleFonts.roboto(
-              fontSize: 16, height: 2, fontWeight: FontWeight.w600),
+              fontSize: 16.0,
+              fontWeight: FontWeight.w500,
+              height: 2.16,
+              color: blackColor),
+          bodyMedium: GoogleFonts.roboto(fontSize: 14.0),
+          labelLarge:
+          GoogleFonts.roboto(fontSize: 16.0, fontWeight: FontWeight.w600),
+          titleLarge:
+          GoogleFonts.roboto(fontSize: 16.0, fontWeight: FontWeight.w600),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          minimumSize: const Size(double.infinity, 64),
+          minimumSize: const Size(double.infinity, 42.0),
           backgroundColor: whiteColor,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
         ),
       ),
       textButtonTheme: const TextButtonThemeData(
@@ -57,53 +59,51 @@ class MyTheme {
         backgroundColor: whiteColor,
         showUnselectedLabels: true,
         selectedLabelStyle: GoogleFonts.roboto(
-          fontWeight: FontWeight.w600,
-          color: primaryColor,
-          fontSize: 14.0,
-        ),
-        unselectedLabelStyle: GoogleFonts.roboto(
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w400,
           color: grayColor,
           fontSize: 14.0,
         ),
-        selectedItemColor: primaryColor,
-        unselectedItemColor: grayColor,
+        unselectedLabelStyle: GoogleFonts.roboto(
+          fontWeight: FontWeight.w400,
+          color: blackColor,
+          fontSize: 14.0,
+        ),
+        selectedItemColor: grayColor,
+        unselectedItemColor: blackColor,
       ),
       inputDecorationTheme: InputDecorationTheme(
         isDense: true,
         hintStyle: GoogleFonts.roboto(
           fontWeight: FontWeight.w400,
-          fontSize: 16.0,
-          color: grayColor,
+          fontSize: 14.0,
+          color: const Color(0xFFBABABA),
         ),
-        labelStyle: GoogleFonts.roboto(
-          fontWeight: FontWeight.w400,
-          fontSize: 16.0,
-          color: hintTextColor,
-        ),
-        contentPadding: Utils.symmetric(v: 20.0),
+        labelStyle: GoogleFonts.roboto(fontWeight: FontWeight.w400, fontSize: 15.0, color: blackColor),
+        contentPadding: Utils.symmetric(v: 6.0, h: 0.0),
         border: OutlineInputBorder(
           borderRadius: borderRadius,
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: borderColor, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: borderRadius,
-          borderSide: const BorderSide(color: primaryColor),
+          borderSide: const BorderSide(color: borderColor, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: borderRadius,
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: borderColor, width: 1),
         ),
-        fillColor: whiteColor,
-        //fillColor: fillColor,
+        errorStyle: GoogleFonts.roboto(
+            color: redColor,fontSize: 12.0,fontWeight: FontWeight.w400
+        ),
+        fillColor: grayBackgroundColor,
         filled: true,
-        focusColor: primaryColor,
+        //focusColor: primaryColor,
       ),
-      textSelectionTheme: const TextSelectionThemeData(
+      textSelectionTheme: TextSelectionThemeData(
         cursorColor: blackColor,
-        selectionColor: blackColor,
-        selectionHandleColor: blackColor,
+        selectionColor: blueColor.withValues(alpha: 0.4),
+        selectionHandleColor: primaryColor,
       ),
       progressIndicatorTheme:
-          const ProgressIndicatorThemeData(color: primaryColor));
+      const ProgressIndicatorThemeData(color: primaryColor));
 }

@@ -19,6 +19,7 @@ const kDuration = Duration(microseconds: 300);
 
 const Color transparent = Colors.transparent;
 const double dialogHeight = 270.0;
+double textFieldSpace = 14.0;
 
 ///custom fonts
 const String bold400 = 'Regular400';
