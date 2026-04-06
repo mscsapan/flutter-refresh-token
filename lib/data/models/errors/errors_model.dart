@@ -17,7 +17,7 @@ import 'package:equatable/equatable.dart';
 /// ```
 class Errors extends Equatable {
   /// Raw field → list-of-messages map exactly as returned by the server.
-  final Map<String, List<String>> fields;
+  final Map<String, List<String?>?>? fields;
 
   const Errors(this.fields);
 
@@ -27,19 +27,20 @@ class Errors extends Equatable {
 
   /// Returns the list of error messages for [fieldName], or an empty list if
   /// there are no errors for that field.
-  List<String> forField(String fieldName) => fields[fieldName] ?? [];
+  // List<String?>? forField(String fieldName) => (fields?[fieldName] ?? []).whereType<String>().toList();
+  List<String> forField(String fieldName) => (fields?[fieldName] ?? []).whereType<String>().toList();
 
   /// Returns the first error message for [fieldName], or `null`.
-  String? firstErrorFor(String fieldName) => forField(fieldName).firstOrNull;
+  String? firstErrorFor(String fieldName) => forField(fieldName).firstOrNull??'';
 
   /// Whether there is at least one error for [fieldName].
-  bool hasField(String fieldName) => fields.containsKey(fieldName) && fields[fieldName]!.isNotEmpty;
+  bool hasField(String fieldName) => (fields?.containsKey(fieldName)??false) && (fields?[fieldName]?.isNotEmpty??false);
 
   /// Whether there are no validation errors at all.
-  bool get isEmpty => fields.isEmpty;
+  bool get isEmpty => fields?.isEmpty??false;
 
   /// All field names that have errors.
-  Iterable<String> get errorFields => fields.keys;
+  Iterable<String> get errorFields => fields?.keys??<String>[];
 
   // ---------------------------------------------------------------------------
   // Serialization
@@ -60,13 +61,12 @@ class Errors extends Equatable {
     return Errors(result);
   }
 
-  factory Errors.fromJson(String source) =>
-      Errors.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory Errors.fromJson(String source) => Errors.fromMap(json.decode(source) as Map<String, dynamic>);
 
   /// Returns an empty [Errors] (no validation failures).
   factory Errors.empty() => const Errors({});
 
-  Map<String, dynamic> toMap() => fields;
+  Map<String, dynamic> toMap() => fields ?? <String,dynamic>{};
 
   String toJson() => json.encode(toMap());
 
@@ -78,5 +78,5 @@ class Errors extends Equatable {
   bool get stringify => true;
 
   @override
-  List<Object> get props => [fields];
+  List<Object?> get props => [fields];
 }
