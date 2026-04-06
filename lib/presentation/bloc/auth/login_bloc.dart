@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/failures/failures.dart';
@@ -25,7 +26,7 @@ class LoginBloc extends Bloc<LoginEvent, UserModel> {
 
   LoginResponseModel? get userInformation => _user;
 
-  set saveUserData(LoginResponseModel userData) => _user = userData;
+  set saveUserData(LoginResponseModel? userData) => _user = userData;
 
   LoginBloc({required AuthUseCases authUseCases})
     : _authUseCases = authUseCases,
@@ -43,15 +44,14 @@ class LoginBloc extends Bloc<LoginEvent, UserModel> {
 
     final existing = state.userInfo ?? UserModel();
     final updated = event.addUserInfo(existing);
-
-    emit(state.copyWith(userInfo: updated, loginState: LoginInitial()));
+    emit(state.copyWith(userInfo: updated));
   }
 
   void _loadExistingUser() {
     final result = _authUseCases.getExistingUserInfo();
     result.fold((failure) => _user = null, (success) {
-      //saveUserData = success?.toData() ?? null;
-      log('Existing user loaded: $success', name: 'saved-user-data');
+      saveUserData = success?.toData();
+      log('Existing user loaded: ${success?.toData()}', name: 'saved-user-data');
     });
   }
 

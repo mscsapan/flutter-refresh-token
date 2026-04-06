@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 
 import '../../data/data_provider/network_parser.dart';
 import '../../data/data_provider/remote_url.dart';
@@ -72,6 +73,7 @@ class TokenRefreshService {
 
     try {
       final refreshToken = await _tokenManager.refreshToken;
+      debugPrint('fetch-refreshToken $refreshToken');
 
       if (refreshToken == null || refreshToken.isEmpty) {
         log('No refresh token available', name: _tag);
@@ -84,7 +86,7 @@ class TokenRefreshService {
       final result = await DioNetworkParser.call(
         () => _refreshDio.post(
           RemoteUrls.refreshToken,
-          data: {'refresh_token': refreshToken},
+          data: {'token': refreshToken},
         ),
       );
 

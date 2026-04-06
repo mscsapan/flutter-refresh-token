@@ -28,7 +28,7 @@ class AuthRepositoryImpl implements AuthRepository {
       // Safe null check
       if(result == null) return Right(null);
 
-      final loginResponse = LoginResponseModel.fromMap(result['data']).toDomain();
+      final loginResponse = LoginResponseModel.fromMap(result).toDomain();
 
       // Cache user info locally
       await localDataSources.cacheUserResponse(loginResponse.toData());

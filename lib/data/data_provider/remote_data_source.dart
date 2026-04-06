@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 
 import '../models/auth/user_model.dart';
 import 'network_parser.dart';
@@ -20,6 +21,8 @@ abstract class RemoteDataSource {
 
   /// Fetches global application/website settings.
   Future getSetting();
+
+  Future getHome();
 }
 
 // ---------------------------------------------------------------------------
@@ -36,8 +39,9 @@ class RemoteDataSourceImpl implements RemoteDataSource {
 
   @override
   Future<dynamic> login(UserModel? body) {
+    // debugPrint('body ${body?.userInfo?.toMap()}');
     return DioNetworkParser.call(
-      () => dio.post(RemoteUrls.login, data: body?.toMap()??{}),
+      () => dio.post(RemoteUrls.login, data: body?.userInfo?.toMap()??{}),
     );
   }
 
@@ -54,7 +58,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
     return DioNetworkParser.call(
       () => dio.post(
         RemoteUrls.refreshToken,
-        data: {'refresh_token': refreshToken},
+        data: {'token': refreshToken},
       ),
     );
   }
@@ -65,6 +69,13 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   Future<dynamic> getSetting() {
     return DioNetworkParser.call(
       () => dio.get(RemoteUrls.websiteSetup),
+    );
+  }
+
+  @override
+  Future<dynamic> getHome() {
+    return DioNetworkParser.call(
+      () => dio.get(RemoteUrls.getHome),
     );
   }
 

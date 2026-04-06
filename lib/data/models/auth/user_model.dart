@@ -53,12 +53,8 @@ class UserModel extends Equatable {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'id': id,
-      'name': name,
       'email': email,
-      'phone': phone,
-      'image': image,
-      'status': status,
+      'password': phone,
     };
   }
 

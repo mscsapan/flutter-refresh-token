@@ -21,8 +21,8 @@ class RemoteUrls {
   static String get getProductionUrl => baseUrl;
 
   // ── Auth endpoints ────────────────────────────────────────────────────────
-  static const String register = 'store-register';
-  static const String login    = 'store-login';
+  static const String register = 'register';
+  static const String login    = 'login';
 
   static const String logout  = 'user/logout';
   static const String refreshToken   = 'refresh-token';
@@ -37,6 +37,7 @@ class RemoteUrls {
 
   // ── Settings ──────────────────────────────────────────────────────────────
   static const String websiteSetup = 'get-setting';
+  static const String getHome = 'get-todos';
 
   // ── Asset helpers (absolute, not sent through Dio) ────────────────────────
   /// Converts a server-relative image path to a fully-qualified URL.

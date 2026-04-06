@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/services/navigation_service.dart';
 import '../../data/models/auth/user_model.dart';
 import '../bloc/auth/login_bloc.dart';
 import '../cubit/auth_session/auth_session_cubit.dart';
@@ -62,14 +63,7 @@ class SessionListenerWrapper extends StatelessWidget {
   }
 
   void _handleSessionExpired(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.orange.shade800,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 4),
-      ),
-    );
+    NavigationService.errorSnackBar(context, message);
 
     Navigator.of(context).pushNamedAndRemoveUntil(
       RouteNames.authScreen,

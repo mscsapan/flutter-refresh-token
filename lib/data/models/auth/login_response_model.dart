@@ -41,8 +41,8 @@ class LoginResponseModel extends Equatable {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'access_token': accessToken,
-      'refresh_token': refreshToken,
+      'accessToken': accessToken,
+      'refreshToken': refreshToken,
       'token_type': tokenType,
       'is_vendor': isVendor,
       'expires_in': expireIn,
@@ -52,8 +52,8 @@ class LoginResponseModel extends Equatable {
 
   factory LoginResponseModel.fromMap(Map<String, dynamic> map) {
     return LoginResponseModel(
-      accessToken: map['access_token'] ?? '',
-      refreshToken: map['refresh_token'] ?? '',
+      accessToken: map['accessToken'] ?? '',
+      refreshToken: map['refreshToken'] ?? '',
       tokenType: map['token_type'] ?? '',
       isVendor: map['is_vendor'] ?? 0,
       expireIn: map['expires_in'] ?? 0,

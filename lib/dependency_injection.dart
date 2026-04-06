@@ -1,10 +1,14 @@
+import 'package:bloc_clean_architecture/presentation/cubit/home/home_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'data/repositories/home_repository_impl.dart';
 import 'dependency_injection_packages.dart';
+import 'domain/repositories/home_repository.dart';
+import 'domain/usecases/home/home_usecases.dart';
 
 class DInjector {
   static late final SharedPreferences _sharedPreferences;
@@ -54,6 +58,11 @@ class DInjector {
         localDataSources: context.read(),
       ),
     ),
+    RepositoryProvider<HomeRepository>(
+      create: (context) => HomeRepositoryImpl(
+        remoteDataSources: context.read(),
+      ),
+    ),
 
     // Combined Auth Use Cases
     RepositoryProvider<AuthUseCases>(
@@ -61,6 +70,10 @@ class DInjector {
     ),
     RepositoryProvider<GetSettingUseCase>(
       create: (context) => GetSettingUseCase(context.read<SettingRepository>()),
+    ),
+
+    RepositoryProvider<HomeDataUseCases>(
+      create: (context) => HomeDataUseCases.create(context.read<HomeRepository>()),
     ),
   ];
 
@@ -80,6 +93,11 @@ class DInjector {
     BlocProvider<SettingCubit>(
       create: (BuildContext context) =>
           SettingCubit(getSettingUseCase: context.read<GetSettingUseCase>()),
+    ),
+
+    BlocProvider<HomeCubit>(
+      create: (BuildContext context) =>
+          HomeCubit(userCase: context.read<HomeDataUseCases>()),
     ),
   ];
 }

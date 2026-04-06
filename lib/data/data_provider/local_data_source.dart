@@ -86,8 +86,7 @@ class LocalDataSourceImpl implements LocalDataSource {
 
   @override
   LoginResponseModel getExistingUserInfo() {
-    final jsonData =
-        sharedPreferences.getString(KString.getExistingUserResponseKey);
+    final jsonData = sharedPreferences.getString(KString.getExistingUserResponseKey);
     if (jsonData != null) return LoginResponseModel.fromJson(jsonData);
     throw const DatabaseException('No cached user found');
   }
