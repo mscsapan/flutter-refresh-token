@@ -406,7 +406,12 @@ class UnifiedGenerator {
     }
 
     // Generate mapper content
-    final mapperContent = _generateMapperContent(modelAnalysis, entityAnalysis);
+    final mapperContent = _generateMapperContent(
+      modelAnalysis,
+      entityAnalysis,
+      modelPath,
+      entityPath,
+    );
 
     // Write mapper file
     await File(mapperPath).writeAsString(mapperContent);
@@ -549,7 +554,7 @@ class UnifiedGenerator {
 
     // Generate all files
     await _generateEntityForFeature(analysis);
-    await _generateMapperForFeature(analysis);
+    await _generateMapperForFeature(analysis, modelPath);
     await _generateRepositoryInterfaceForFeature(analysis);
     await _generateRepositoryImplForFeature(analysis);
     await _generateDataSourceForFeature(analysis, true); // Remote
@@ -602,17 +607,20 @@ class UnifiedGenerator {
     ).writeAsString(entityContent);
   }
 
-  static Future<void> _generateMapperForFeature(ModelAnalysis analysis) async {
+  static Future<void> _generateMapperForFeature(
+    ModelAnalysis analysis,
+    String modelPath,
+  ) async {
     // Create mock entity analysis for mapper generation
     final entityAnalysis = EntityAnalysis(
-      className:
-          '${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Entity',
+      className: _toClassCase(analysis.featureName) + 'Entity',
       featureName: analysis.featureName,
       properties: analysis.properties
           .map(
             (p) => PropertyInfo(
               type: _convertModelTypeToEntityType(p.type),
               name: p.name,
+              isNullable: p.isNullable,
             ),
           )
           .toList(),
@@ -620,7 +628,12 @@ class UnifiedGenerator {
           'lib/domain/entities/${analysis.featureName}/${analysis.featureName}_entity.dart',
     );
 
-    final mapperContent = _generateMapperContent(analysis, entityAnalysis);
+    final mapperContent = _generateMapperContent(
+      analysis,
+      entityAnalysis,
+      modelPath,
+      entityAnalysis.filePath,
+    );
     await File(
       'lib/data/mappers/${analysis.featureName}_mapper.dart',
     ).writeAsString(mapperContent);
@@ -658,11 +671,15 @@ class UnifiedGenerator {
   static Future<void> _generateUseCaseForFeature(ModelAnalysis analysis) async {
     // Create mock repository analysis for use case generation
     final repoAnalysis = RepositoryAnalysis(
-      className:
-          '${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Repository',
+      className: _toClassCase(analysis.featureName) + 'Repository',
       featureName: analysis.featureName,
       methods: [
-        'get${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Data',
+        MethodInfo(
+          name: 'get${_toClassCase(analysis.featureName)}Data',
+          returnType:
+              'Either<Failure, ${_toClassCase(analysis.featureName)}Entity>',
+          parameters: [],
+        ),
       ],
       filePath:
           'lib/domain/repositories/${analysis.featureName}_repository.dart',
@@ -678,20 +695,24 @@ class UnifiedGenerator {
   static ModelAnalysis? _analyzeModel(String content, String filePath) {
     try {
       // Extract class name
-      final classMatch = RegExp(r'class\s+(\w+)\s+extends').firstMatch(content);
+      final classMatch = RegExp(
+        r'class\s+(\w+)\s+(?:extends|implements|\{)',
+      ).firstMatch(content);
       if (classMatch == null) return null;
 
       final className = classMatch.group(1)!;
-      final featureName = className.toLowerCase().replaceAll('model', '');
+      final featureName = _toSnakeCase(className.replaceAll('Model', ''));
 
-      // Extract properties
+      // Extract properties with nullable info
       final propertyMatches = RegExp(
         r'final\s+([^;]+?)\s+(\w+);',
       ).allMatches(content);
+
       final properties = propertyMatches.map((match) {
         final type = match.group(1)!.trim();
         final name = match.group(2)!.trim();
-        return PropertyInfo(type: type, name: name);
+        final isNullable = type.endsWith('?');
+        return PropertyInfo(type: type, name: name, isNullable: isNullable);
       }).toList();
 
       return ModelAnalysis(
@@ -709,20 +730,24 @@ class UnifiedGenerator {
   static EntityAnalysis? _analyzeEntity(String content, String filePath) {
     try {
       // Extract class name
-      final classMatch = RegExp(r'class\s+(\w+)\s+extends').firstMatch(content);
+      final classMatch = RegExp(
+        r'class\s+(\w+)\s+(?:extends|implements|\{)',
+      ).firstMatch(content);
       if (classMatch == null) return null;
 
       final className = classMatch.group(1)!;
-      final featureName = className.toLowerCase().replaceAll('entity', '');
+      final featureName = _toSnakeCase(className.replaceAll('Entity', ''));
 
-      // Extract properties
+      // Extract properties with nullable info
       final propertyMatches = RegExp(
         r'final\s+([^;]+?)\s+(\w+);',
       ).allMatches(content);
+
       final properties = propertyMatches.map((match) {
         final type = match.group(1)!.trim();
         final name = match.group(2)!.trim();
-        return PropertyInfo(type: type, name: name);
+        final isNullable = type.endsWith('?');
+        return PropertyInfo(type: type, name: name, isNullable: isNullable);
       }).toList();
 
       return EntityAnalysis(
@@ -742,22 +767,36 @@ class UnifiedGenerator {
     String filePath,
   ) {
     try {
-      final classMatch = RegExp(
-        r'class\s+(\w+)\s+implements',
+      // Try to find abstract class first, then regular class
+      var classMatch = RegExp(
+        r'(?:abstract\s+)?class\s+(\w+)',
       ).firstMatch(content);
+
       if (classMatch == null) return null;
 
       final className = classMatch.group(1)!;
-      final featureName = className
-          .toLowerCase()
-          .replaceAll('repositoryimpl', '')
-          .replaceAll('repository', '');
+      final featureName = _toSnakeCase(
+        className.replaceAll('RepositoryImpl', '').replaceAll('Repository', ''),
+      );
 
-      // Extract methods
+      // Extract methods with more detail
       final methodMatches = RegExp(
-        r'Future<[^>]+>\s+(\w+)\(',
+        r'Future<([^>]+)>\s+(\w+)\(([^)]*)\)',
       ).allMatches(content);
-      final methods = methodMatches.map((m) => m.group(1)!).toList();
+
+      final methods = methodMatches.map((m) {
+        final returnType = m.group(1)!.trim();
+        final name = m.group(2)!.trim();
+        final params = m.group(3)!.trim();
+
+        return MethodInfo(
+          name: name,
+          returnType: 'Future<$returnType>',
+          parameters: params.isEmpty
+              ? []
+              : params.split(',').map((p) => p.trim()).toList(),
+        );
+      }).toList();
 
       return RepositoryAnalysis(
         className: className,
@@ -773,12 +812,15 @@ class UnifiedGenerator {
 
   // Content generation methods
   static String _generateEntityContent(ModelAnalysis analysis) {
-    final className =
-        '${analysis.featureName.split('_').map((e) => '${e[0].toUpperCase()}${e.substring(1)}').join('')}Entity';
+    final className = _toClassCase(analysis.featureName) + 'Entity';
 
     final entityProperties = analysis.properties.map((prop) {
       final entityType = _convertModelTypeToEntityType(prop.type);
-      return PropertyInfo(type: entityType, name: prop.name);
+      return PropertyInfo(
+        type: entityType,
+        name: prop.name,
+        isNullable: prop.isNullable,
+      );
     }).toList();
 
     final propertyDeclarations = entityProperties
@@ -832,23 +874,31 @@ $copyWithAssignments
   static String _generateMapperContent(
     ModelAnalysis modelAnalysis,
     EntityAnalysis entityAnalysis,
+    String modelPath,
+    String entityPath,
   ) {
     final modelClass = modelAnalysis.className;
     final entityClass = entityAnalysis.className;
     final featureName = modelAnalysis.featureName;
 
+    // Extract relative paths for imports
+    final modelImportPath = _getRelativeImportPath(modelPath, 'data/mappers');
+    final entityImportPath = _getRelativeImportPath(entityPath, 'data/mappers');
+
     final modelToEntityMappings = _generatePropertyMappings(
       modelAnalysis.properties,
       entityAnalysis.properties,
+      isModelToEntity: true,
     );
 
     final entityToModelMappings = _generatePropertyMappings(
       entityAnalysis.properties,
       modelAnalysis.properties,
+      isModelToEntity: false,
     );
 
-    return '''import '../../domain/entities/$featureName/${featureName}_entity.dart';
-import '../models/$featureName/${featureName}_model.dart';
+    return '''import '$entityImportPath';
+import '$modelImportPath';
 
 /// Mappers for ${featureName.toUpperCase()}
 extension ${modelClass}Mapper on $modelClass {
@@ -872,13 +922,16 @@ $entityToModelMappings
 
   static String _generateUseCaseContent(RepositoryAnalysis analysis) {
     final featureName = analysis.featureName;
-    final pascalFeatureName = featureName
-        .split('_')
-        .map((e) => '${e[0].toUpperCase()}${e.substring(1)}')
-        .join('');
+    final pascalFeatureName = _toClassCase(featureName);
     final useCaseClass = 'Get${pascalFeatureName}UseCase';
     final repositoryClass = '${pascalFeatureName}Repository';
     final entityClass = '${pascalFeatureName}Entity';
+
+    // Determine if the method has parameters
+    final hasParams =
+        analysis.methods.isNotEmpty &&
+        analysis.methods.first.parameters.isNotEmpty;
+    final paramsType = hasParams ? '${pascalFeatureName}Params' : 'NoParams';
 
     return '''import 'package:dartz/dartz.dart';
 
@@ -890,13 +943,13 @@ import '../repositories/${featureName}_repository.dart';
 /// Use Case for fetching ${featureName.toUpperCase()} data
 /// 
 /// This encapsulates the business logic for getting $featureName data
-class $useCaseClass implements UseCase<$entityClass, NoParams> {
+class $useCaseClass implements UseCase<$entityClass, $paramsType> {
   final $repositoryClass repository;
 
   $useCaseClass(this.repository);
 
   @override
-  Future<Either<Failure, $entityClass>> call(NoParams params) async {
+  Future<Either<Failure, $entityClass>> call($paramsType params) async {
     return await repository.get${pascalFeatureName}Data();
   }
 }''';
@@ -907,10 +960,7 @@ class $useCaseClass implements UseCase<$entityClass, NoParams> {
     bool isRemote,
   ) {
     final featureName = analysis.featureName;
-    final pascalFeatureName = featureName
-        .split('_')
-        .map((e) => '${e[0].toUpperCase()}${e.substring(1)}')
-        .join('');
+    final pascalFeatureName = _toClassCase(featureName);
     final sourceType = isRemote ? 'Remote' : 'Local';
     final abstractClass = '$pascalFeatureName${sourceType}DataSource';
     final implClass = '$pascalFeatureName${sourceType}DataSourceImpl';
@@ -928,10 +978,7 @@ class $useCaseClass implements UseCase<$entityClass, NoParams> {
     String implClass,
   ) {
     final featureName = analysis.featureName;
-    final pascalFeatureName = featureName
-        .split('_')
-        .map((e) => '${e[0].toUpperCase()}${e.substring(1)}')
-        .join('');
+    final pascalFeatureName = _toClassCase(featureName);
 
     return '''import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -983,10 +1030,7 @@ class $implClass implements $abstractClass {
     String implClass,
   ) {
     final featureName = analysis.featureName;
-    final pascalFeatureName = featureName
-        .split('_')
-        .map((e) => '${e[0].toUpperCase()}${e.substring(1)}')
-        .join('');
+    final pascalFeatureName = _toClassCase(featureName);
 
     return '''import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -1028,10 +1072,7 @@ class $implClass implements $abstractClass {
 
   static String _generateRepositoryInterfaceContent(ModelAnalysis analysis) {
     final featureName = analysis.featureName;
-    final pascalFeatureName = featureName
-        .split('_')
-        .map((e) => '${e[0].toUpperCase()}${e.substring(1)}')
-        .join('');
+    final pascalFeatureName = _toClassCase(featureName);
     final repositoryClass = '${pascalFeatureName}Repository';
     final entityClass = '${pascalFeatureName}Entity';
 
@@ -1050,10 +1091,7 @@ abstract class $repositoryClass {
 
   static String _generateRepositoryImplContent(ModelAnalysis analysis) {
     final featureName = analysis.featureName;
-    final pascalFeatureName = featureName
-        .split('_')
-        .map((e) => '${e[0].toUpperCase()}${e.substring(1)}')
-        .join('');
+    final pascalFeatureName = _toClassCase(featureName);
     final repositoryClass = '${pascalFeatureName}Repository';
     final repositoryImplClass = '${pascalFeatureName}RepositoryImpl';
     final entityClass = '${pascalFeatureName}Entity';
@@ -1114,6 +1152,47 @@ class $repositoryImplClass implements $repositoryClass {
   }
 
   // Helper methods
+
+  /// Converts PascalCase/camelCase to snake_case
+  static String _toSnakeCase(String input) {
+    if (input.isEmpty) return input;
+
+    return input
+        .replaceAllMapped(
+          RegExp(r'[A-Z]'),
+          (match) => '_${match.group(0)!.toLowerCase()}',
+        )
+        .replaceFirst(RegExp(r'^_'), '')
+        .toLowerCase();
+  }
+
+  /// Converts snake_case to PascalCase
+  static String _toClassCase(String input) {
+    return input
+        .split('_')
+        .map(
+          (word) => word.isEmpty
+              ? ''
+              : '${word[0].toUpperCase()}${word.substring(1)}',
+        )
+        .join('');
+  }
+
+  /// Get relative import path from source to target
+  static String _getRelativeImportPath(String absolutePath, String fromDir) {
+    // Extract the path after 'lib/'
+    final libIndex = absolutePath.indexOf('lib/');
+    if (libIndex == -1) return absolutePath;
+
+    final relativePath = absolutePath.substring(libIndex + 4);
+
+    // Count directory depth
+    final fromDepth = fromDir.split('/').length;
+    final goUp = '../' * fromDepth;
+
+    return '$goUp$relativePath';
+  }
+
   static String _convertModelTypeToEntityType(String modelType) {
     if (modelType.contains('List<') && modelType.contains('Model')) {
       return modelType.replaceAll('Model', 'Entity');
@@ -1126,29 +1205,79 @@ class $repositoryImplClass implements $repositoryClass {
 
   static String _generatePropertyMappings(
     List<PropertyInfo> sourceProps,
-    List<PropertyInfo> targetProps,
-  ) {
+    List<PropertyInfo> targetProps, {
+    required bool isModelToEntity,
+  }) {
     final mappings = <String>[];
 
     for (final targetProp in targetProps) {
       final sourceProp = sourceProps.firstWhere(
         (p) => p.name == targetProp.name,
-        orElse: () => PropertyInfo(type: 'dynamic', name: targetProp.name),
+        orElse: () => PropertyInfo(
+          type: 'dynamic',
+          name: targetProp.name,
+          isNullable: true,
+        ),
       );
 
+      // Handle List<Model> to List<Entity> conversion
       if (sourceProp.type.contains('List<') &&
           sourceProp.type.contains('Model') &&
           targetProp.type.contains('List<') &&
           targetProp.type.contains('Entity')) {
-        mappings.add(
-          '      ${targetProp.name}: ${sourceProp.name}?.map((item) => item.toDomain()).toList(),',
-        );
-      } else if (sourceProp.type.contains('Model') &&
+        if (sourceProp.isNullable) {
+          mappings.add(
+            '      ${targetProp.name}: ${sourceProp.name}?.map((item) => item.toDomain()).toList(),',
+          );
+        } else {
+          mappings.add(
+            '      ${targetProp.name}: ${sourceProp.name}.map((item) => item.toDomain()).toList(),',
+          );
+        }
+      }
+      // Handle List<Entity> to List<Model> conversion
+      else if (sourceProp.type.contains('List<') &&
+          sourceProp.type.contains('Entity') &&
+          targetProp.type.contains('List<') &&
+          targetProp.type.contains('Model')) {
+        if (sourceProp.isNullable) {
+          mappings.add(
+            '      ${targetProp.name}: ${sourceProp.name}?.map((item) => item.toData()).toList(),',
+          );
+        } else {
+          mappings.add(
+            '      ${targetProp.name}: ${sourceProp.name}.map((item) => item.toData()).toList(),',
+          );
+        }
+      }
+      // Handle single Model to Entity conversion
+      else if (sourceProp.type.contains('Model') &&
           targetProp.type.contains('Entity')) {
-        mappings.add(
-          '      ${targetProp.name}: ${sourceProp.name}?.toDomain(),',
-        );
-      } else {
+        if (sourceProp.isNullable) {
+          mappings.add(
+            '      ${targetProp.name}: ${sourceProp.name}?.toDomain(),',
+          );
+        } else {
+          mappings.add(
+            '      ${targetProp.name}: ${sourceProp.name}.toDomain(),',
+          );
+        }
+      }
+      // Handle single Entity to Model conversion
+      else if (sourceProp.type.contains('Entity') &&
+          targetProp.type.contains('Model')) {
+        if (sourceProp.isNullable) {
+          mappings.add(
+            '      ${targetProp.name}: ${sourceProp.name}?.toData(),',
+          );
+        } else {
+          mappings.add(
+            '      ${targetProp.name}: ${sourceProp.name}.toData(),',
+          );
+        }
+      }
+      // Direct assignment for primitive types
+      else {
         mappings.add('      ${targetProp.name}: ${sourceProp.name},');
       }
     }
@@ -1189,7 +1318,7 @@ class EntityAnalysis {
 class RepositoryAnalysis {
   final String className;
   final String featureName;
-  final List<String> methods;
+  final List<MethodInfo> methods;
   final String filePath;
 
   RepositoryAnalysis({
@@ -1203,8 +1332,25 @@ class RepositoryAnalysis {
 class PropertyInfo {
   final String type;
   final String name;
+  final bool isNullable;
 
-  PropertyInfo({required this.type, required this.name});
+  PropertyInfo({
+    required this.type,
+    required this.name,
+    this.isNullable = false,
+  });
+}
+
+class MethodInfo {
+  final String name;
+  final String returnType;
+  final List<String> parameters;
+
+  MethodInfo({
+    required this.name,
+    required this.returnType,
+    required this.parameters,
+  });
 }
 
 // Main function

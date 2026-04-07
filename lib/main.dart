@@ -1,4 +1,3 @@
-import 'package:bloc_clean_architecture/dependency_injection_packages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
