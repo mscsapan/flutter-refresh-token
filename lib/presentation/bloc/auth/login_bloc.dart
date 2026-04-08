@@ -42,7 +42,7 @@ class LoginBloc extends Bloc<LoginEvent, UserModel> {
 
     final existing = state.userInfo ?? UserModel();
     final updated = event.addUserInfo(existing);
-    emit(state.copyWith(userInfo: updated));
+    emit(state.copyWith(userInfo: updated,loginState: LoginInitial()));
   }
 
   void _loadExistingUser() {

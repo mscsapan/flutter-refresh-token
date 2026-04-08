@@ -23,7 +23,7 @@ class UserModel extends Equatable {
     this.image = '',
     this.status = 0,
     this.userInfo,
-    this.isShow = false,
+    this.isShow = true,
     this.loginState = const LoginInitial(),
   });
 

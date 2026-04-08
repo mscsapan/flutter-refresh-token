@@ -26,7 +26,8 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   void initState() {
-    loginBloc = context.read<LoginBloc>();
+    loginBloc = context.read<LoginBloc>()
+      ..add(LoginInfoAddEvent((e)=>e.userInfo?.copyWith(isShow: true)??UserModel()));
     super.initState();
   }
 
@@ -46,7 +47,6 @@ class _AuthScreenState extends State<AuthScreen> {
         },
         builder: (context, state) {
           final loginState = state.loginState;
-          final isShow = state.userInfo?.isShow?? false;
           return Padding(
             padding: Utils.symmetric(h: 14.0),
             child: Column(
@@ -72,7 +72,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       keyboardType: TextInputType.visiblePassword,
                       initialValue: state.userInfo?.phone,
                       onChanged:(val)=>  loginBloc.add(LoginInfoAddEvent((info)=>info.copyWith(phone: val))),
-                      obscureText: isShow,
+                      obscureText: state.userInfo?.isShow?? false,
 
                       validator: Utils.requiredValidator('Password'),
                       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -81,7 +81,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         prefix: Utils.horizontalSpace(textFieldSpace),
                         suffixIcon: IconButton(
                           onPressed:()=> loginBloc.add(LoginInfoAddEvent((info)=>info.copyWith(isShow: !(state.userInfo?.isShow??false)))),
-                          icon: Icon(isShow ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: blackColor),
+                          icon: Icon((state.userInfo?.isShow?? false) ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: blackColor),
                         ),
                       ),
                     )),
