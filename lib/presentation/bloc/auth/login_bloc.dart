@@ -1,10 +1,10 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/failures/failures.dart';
-import '../../../core/network/dio_client.dart';
 import '../../../core/network/token_manager.dart';
 import '../../../data/mappers/auth/login_response_mapper.dart';
 import '../../../data/models/auth/login_response_model.dart';
@@ -17,6 +17,8 @@ part 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, UserModel> {
   final AuthUseCases _authUseCases;
+  final TokenManager _tokenManager;
+  late final StreamSubscription<TokenSnapshot> _tokenSubscription;
 
   LoginResponseModel? _user;
 
@@ -26,16 +28,41 @@ class LoginBloc extends Bloc<LoginEvent, UserModel> {
 
   set saveUserData(LoginResponseModel? userData) => _user = userData;
 
-  LoginBloc({required AuthUseCases authUseCases})
+  LoginBloc({
+    required AuthUseCases authUseCases,
+    TokenManager? tokenManager,
+  })
     : _authUseCases = authUseCases,
+      _tokenManager = tokenManager ?? TokenManager.instance,
       super(const UserModel()) {
     on<LoginInfoAddEvent>(_onLoginInfoAddSubmit);
     on<LoginEventSubmit>(_onLoginSubmit);
     on<LoginEventLogout>(_onLogout);
     on<LoginEventSessionExpired>(_onSessionExpired);
+    on<LoginEventTokensUpdated>(_onTokensUpdated);
 
     // Load existing user info on initialization
     _loadExistingUser();
+    _tokenSubscription = _tokenManager.tokenChanges.listen(_onTokenChanged);
+  }
+
+  void _onTokenChanged(TokenSnapshot snapshot) {
+    if (_user == null) return;
+    final accessToken = snapshot.accessToken;
+    if (accessToken == null || accessToken.isEmpty) return;
+    add(LoginEventTokensUpdated(
+      accessToken: accessToken,
+      refreshToken: snapshot.refreshToken,
+    ));
+  }
+
+  void _onTokensUpdated(LoginEventTokensUpdated event, Emitter<UserModel> emit) {
+    if (_user == null) return;
+    _user = _user?.copyWith(
+      accessToken: event.accessToken,
+      refreshToken: event.refreshToken ?? _user?.refreshToken,
+    );
+    emit(state.copyWith(loginState: LoginLoaded(authResponse: _user)));
   }
 
   void _onLoginInfoAddSubmit(LoginInfoAddEvent event,Emitter<UserModel> emit){
@@ -45,12 +72,23 @@ class LoginBloc extends Bloc<LoginEvent, UserModel> {
     emit(state.copyWith(userInfo: updated,loginState: LoginInitial()));
   }
 
-  void _loadExistingUser() {
+  Future<void> _loadExistingUser() async {
     final result = _authUseCases.getExistingUserInfo();
-    result.fold((failure) => _user = null, (success) {
-      saveUserData = success?.toData();
-      log('Existing user loaded: ${success?.toData()}', name: 'saved-user-data');
-    });
+    await result.fold(
+      (failure) async => _user = null,
+      (success) async {
+        final cachedUser = success?.toData();
+        saveUserData = cachedUser;
+        log('Existing user loaded: $cachedUser', name: 'saved-user-data');
+
+        if (cachedUser != null && cachedUser.accessToken.isNotEmpty) {
+          await _tokenManager.saveTokens(
+            accessToken: cachedUser.accessToken,
+            refreshToken: cachedUser.refreshToken,
+          );
+        }
+      },
+    );
   }
 
   // void updateExistingToken(LoginResponseModel ? model) {
@@ -136,6 +174,11 @@ class LoginBloc extends Bloc<LoginEvent, UserModel> {
     _user = null;
     // removeCredentials();
     TokenManager.instance.clearTokens();
-    DioClient.reset();
+  }
+
+  @override
+  Future<void> close() {
+    _tokenSubscription.cancel();
+    return super.close();
   }
 }

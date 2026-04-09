@@ -1,4 +1,4 @@
-import 'package:bloc_clean_architecture/presentation/cubit/home/home_cubit.dart';
+import '/presentation/cubit/home/home_cubit.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,36 +12,37 @@ import 'domain/usecases/home/home_usecases.dart';
 
 class DInjector {
   static late final SharedPreferences _sharedPreferences;
+  static late final LocalDataSource _localDataSource;
 
   /// Pre-configured [FlutterSecureStorage] instance for sensitive data.
   static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   static Future<void> initDB() async {
+
     _sharedPreferences = await SharedPreferences.getInstance();
+
+    _localDataSource = LocalDataSourceImpl(sharedPreferences: _sharedPreferences, secureStorage: _secureStorage);
+
+    DioClient.configure(localDataSource: _localDataSource);
 
     // Initialise the token manager so cached tokens are available immediately
     await TokenManager.instance.init();
   }
 
   static final repositoryProvider = <RepositoryProvider>[
+    RepositoryProvider<SharedPreferences>(create: (context) => _sharedPreferences),
+
+    RepositoryProvider<FlutterSecureStorage>(create: (context) => _secureStorage),
+
+    RepositoryProvider<LocalDataSource>(create: (context) => _localDataSource),
     // Core dependencies — Dio HTTP client
-    RepositoryProvider<Dio>(create: (context) => DioClient.create()),
-    RepositoryProvider<SharedPreferences>(
-      create: (context) => _sharedPreferences,
-    ),
-    RepositoryProvider<FlutterSecureStorage>(
-      create: (context) => _secureStorage,
+    RepositoryProvider<Dio>(
+      create: (context) => DioClient.create(localDataSource: context.read<LocalDataSource>()),
     ),
 
     // Data sources
     RepositoryProvider<RemoteDataSource>(
       create: (context) => RemoteDataSourceImpl(dio: context.read<Dio>()),
-    ),
-    RepositoryProvider<LocalDataSource>(
-      create: (context) => LocalDataSourceImpl(
-        sharedPreferences: context.read<SharedPreferences>(),
-        secureStorage: context.read<FlutterSecureStorage>(),
-      ),
     ),
 
     // Repository implementations
@@ -59,9 +60,7 @@ class DInjector {
       ),
     ),
     RepositoryProvider<HomeRepository>(
-      create: (context) => HomeRepositoryImpl(
-        remoteDataSources: context.read(),
-      ),
+      create: (context) => HomeRepositoryImpl(remoteDataSources: context.read()),
     ),
 
     // Combined Auth Use Cases

@@ -5,6 +5,8 @@ import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../config/env_config.dart';
+import '../../data/data_provider/local_data_source.dart';
+import 'auth_strategy.dart';
 import 'auth_interceptor.dart';
 import 'retry_interceptor.dart';
 import 'token_manager.dart';
@@ -30,6 +32,12 @@ class DioClient {
   /// The single [TokenRefreshService] instance shared with [AuthInterceptor]
   /// and [AuthSessionCubit].
   static TokenRefreshService? _tokenRefreshService;
+  static LocalDataSource? _localDataSource;
+
+  /// Must be called during DI setup before [tokenRefreshService] getter is used.
+  static void configure({required LocalDataSource localDataSource}) {
+    _localDataSource = localDataSource;
+  }
 
   /// Returns the singleton [TokenRefreshService].
   ///
@@ -38,7 +46,11 @@ class DioClient {
   static TokenRefreshService get tokenRefreshService {
     if (_tokenRefreshService == null) {
       // Trigger creation of both singletons together
-      create();
+      final configuredLocalDataSource = _localDataSource;
+      if (configuredLocalDataSource == null) {
+        throw StateError('DioClient is not configured. Call DioClient.configure() first.');
+      }
+      create(localDataSource: configuredLocalDataSource);
     }
     return _tokenRefreshService!;
   }
@@ -51,8 +63,12 @@ class DioClient {
   ///  2. **RetryInterceptor** — retries on network errors (waits for connectivity)
   ///  3. **PrettyDioLogger** — logs requests/responses (debug only)
   ///  4. **Error logger** — structured error logging
-  static Dio create() {
+  static Dio create({LocalDataSource? localDataSource}) {
     if (_instance != null) return _instance ?? Dio();
+    final resolvedLocalDataSource = localDataSource ?? _localDataSource;
+    if (resolvedLocalDataSource == null) {
+      throw StateError('DioClient is missing LocalDataSource. Call configure() or pass it to create().');
+    }
 
     final dio = Dio(
       BaseOptions(
@@ -67,6 +83,7 @@ class DioClient {
         responseType: ResponseType.json,
       ),
     );
+   // log('Configured baseUrl: ${EnvConfig.baseUrl}', name: 'DioClient');
 
     // ── Shared refresh Dio (used by both TokenRefreshService and for retrying) ─
     // Uses a *separate* Dio instance for the refresh call to avoid deadlocks
@@ -91,6 +108,7 @@ class DioClient {
     _tokenRefreshService = TokenRefreshService(
       refreshDio: refreshDio,
       tokenManager: TokenManager.instance,
+      localDataSource: resolvedLocalDataSource,
     );
 
     // ── 1. Auth interceptor ───────────────────────────────────────────────
@@ -191,20 +209,32 @@ class _TokenOnlyInterceptor extends Interceptor {
         _tokenRefreshService = tokenRefreshService;
 
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+
+    final authStrategy = options.extra[authStrategyExtraKey] as AuthStrategy? ?? AuthStrategy.header;
+    if (authStrategy == AuthStrategy.none) {
+      handler.next(options);
+      return;
+    }
+
     final token = await _tokenManager.accessToken;
     if (token != null && token.isNotEmpty) {
-      options.headers['Authorization'] = 'Bearer $token';
+      if (authStrategy == AuthStrategy.queryParam) {
+        options.queryParameters = {
+          ...options.queryParameters,
+          'token': token,
+        };
+      } else {
+        options.headers['Authorization'] = 'Bearer $token';
+      }
     }
     handler.next(options);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    if (err.response?.statusCode == 401) {
+    final authStrategy = err.requestOptions.extra[authStrategyExtraKey] as AuthStrategy? ?? AuthStrategy.header;
+    if (err.response?.statusCode == 401 && authStrategy != AuthStrategy.none) {
       // Notify the AuthSessionCubit via the shared service stream
       _tokenRefreshService.notifySessionExpired();
     }

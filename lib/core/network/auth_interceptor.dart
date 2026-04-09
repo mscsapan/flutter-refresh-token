@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 
 import '../../data/data_provider/remote_url.dart';
+import 'auth_strategy.dart';
 import 'token_manager.dart';
 import 'token_refresh_service.dart';
 
@@ -44,19 +45,29 @@ class AuthInterceptor extends QueuedInterceptorsWrapper {
   // ── Attach token to every outgoing request ──────────────────────────────
 
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     // Skip attaching token for the refresh endpoint itself
     if (_isRefreshEndpoint(options.path)) {
       handler.next(options);
       return;
     }
 
+    final authStrategy = options.extra[authStrategyExtraKey] as AuthStrategy? ?? AuthStrategy.header;
+    if (authStrategy == AuthStrategy.none) {
+      handler.next(options);
+      return;
+    }
+
     final token = await _tokenManager.accessToken;
     if (token != null && token.isNotEmpty) {
-      options.headers['Authorization'] = 'Bearer $token';
+      if (authStrategy == AuthStrategy.queryParam) {
+        options.queryParameters = {
+          ...options.queryParameters,
+          'token': token,
+        };
+      } else {
+        options.headers['Authorization'] = 'Bearer $token';
+      }
     }
     handler.next(options);
   }
@@ -67,6 +78,14 @@ class AuthInterceptor extends QueuedInterceptorsWrapper {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     // Only intercept 401 Unauthorized
     if (err.response?.statusCode != 401) {
+      handler.next(err);
+      return;
+    }
+
+    final authStrategy = err.requestOptions.extra[authStrategyExtraKey] as AuthStrategy? ?? AuthStrategy.header;
+    // Public/unauthenticated endpoints (e.g. login) should not trigger
+    // refresh/session-expired flows on 401.
+    if (authStrategy == AuthStrategy.none) {
       handler.next(err);
       return;
     }
@@ -88,7 +107,17 @@ class AuthInterceptor extends QueuedInterceptorsWrapper {
       try {
         final newToken = await _tokenManager.accessToken;
         final opts = err.requestOptions;
-        opts.headers['Authorization'] = 'Bearer $newToken';
+        final authStrategy = opts.extra[authStrategyExtraKey] as AuthStrategy? ?? AuthStrategy.header;
+        if (newToken != null && newToken.isNotEmpty) {
+          if (authStrategy == AuthStrategy.queryParam) {
+            opts.queryParameters = {
+              ...opts.queryParameters,
+              'token': newToken,
+            };
+          } else if (authStrategy == AuthStrategy.header) {
+            opts.headers['Authorization'] = 'Bearer $newToken';
+          }
+        }
 
         final response = await _refreshDio.fetch(opts);
         handler.resolve(response);

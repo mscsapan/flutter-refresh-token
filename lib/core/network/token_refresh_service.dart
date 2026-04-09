@@ -5,6 +5,7 @@ import 'package:bloc_clean_architecture/dependency_injection_packages.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
+import '../../data/data_provider/local_data_source.dart';
 import '../../data/data_provider/network_parser.dart';
 import '../../data/data_provider/remote_url.dart';
 import '../../data/models/auth/login_response_model.dart';
@@ -38,6 +39,7 @@ enum SessionEvent { refreshed, expired }
 class TokenRefreshService {
   final Dio _refreshDio;
   final TokenManager _tokenManager;
+  final LocalDataSource _localDataSource;
 
 
   static const _tag = 'TokenRefreshService';
@@ -57,8 +59,10 @@ class TokenRefreshService {
   TokenRefreshService({
     required Dio refreshDio,
     required TokenManager tokenManager,
+    required LocalDataSource localDataSource,
   }) : _refreshDio = refreshDio,
-       _tokenManager = tokenManager;
+       _tokenManager = tokenManager,
+       _localDataSource = localDataSource;
 
   // ── Refresh logic ────────────────────────────────────────────────────────
 
@@ -98,12 +102,13 @@ class TokenRefreshService {
       debugPrint('======== new token generated========= $userResponse');
 
       if (userResponse.accessToken.isNotEmpty) {
-        await _tokenManager.saveTokens(
-          accessToken: userResponse.accessToken,
-          refreshToken: userResponse.refreshToken.isNotEmpty
-              ? userResponse.refreshToken
-              : refreshToken,
-        );
+        final updatedRefreshToken = userResponse.refreshToken.isNotEmpty
+            ? userResponse.refreshToken
+            : refreshToken;
+
+        await _tokenManager.saveTokens(accessToken: userResponse.accessToken, refreshToken: updatedRefreshToken);
+
+        await _localDataSource.updateCachedUserTokens(accessToken: userResponse.accessToken, refreshToken: updatedRefreshToken);
 
         log('Token refreshed successfully', name: _tag);
         _sessionController.add(SessionEvent.refreshed);

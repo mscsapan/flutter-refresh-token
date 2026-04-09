@@ -11,6 +11,8 @@ part 'internet_status_state.dart';
 class InternetStatusBloc extends Bloc<InternetStatusEvent, InternetStatusState> {
   final Connectivity _connectivity = Connectivity();
   late StreamSubscription<List<ConnectivityResult>> _subscription;
+  bool _isOnline = true;
+  bool _hasBeenOffline = false;
 
   InternetStatusBloc() : super(InternetStatusInitial()) {
     on<InternetStatusBackEvent>((event, emit) =>
@@ -23,28 +25,45 @@ class InternetStatusBloc extends Bloc<InternetStatusEvent, InternetStatusState> 
     _subscription = Connectivity()
         .onConnectivityChanged
         .listen((List<ConnectivityResult> result) {
-      if (result.contains(ConnectivityResult.mobile) ||
-          result.contains(ConnectivityResult.wifi) ||
-          result.contains(ConnectivityResult.ethernet)) {
-        // debugPrint('called - mobile/wifi');
-        add(InternetStatusBackEvent());
-      } else {
-        // debugPrint('called - nothing');
-        add(InternetStatusLostEvent());
-      }
+      _handleConnectivity(result);
     });
   }
 
   Future<void> _initialCheck() async {
-    // debugPrint('called _initialCheck');
     final connectivityResult = await _connectivity.checkConnectivity();
-    if (connectivityResult.contains(ConnectivityResult.none)) {
-      // debugPrint('called - lost');
+    _isOnline = _hasInternet(connectivityResult);
+    if (!_isOnline) {
+      _hasBeenOffline = true;
       add(InternetStatusLostEvent());
-    } else {
-      // debugPrint('called - gained');
-      add(InternetStatusBackEvent());
     }
+  }
+
+  void _handleConnectivity(List<ConnectivityResult> result) {
+    final currentlyOnline = _hasInternet(result);
+
+    if (!currentlyOnline) {
+      if (_isOnline) {
+        _isOnline = false;
+        _hasBeenOffline = true;
+        add(InternetStatusLostEvent());
+      }
+      return;
+    }
+
+    if (!_isOnline && _hasBeenOffline) {
+      _isOnline = true;
+      _hasBeenOffline = false;
+      add(InternetStatusBackEvent());
+      return;
+    }
+
+    _isOnline = true;
+  }
+
+  bool _hasInternet(List<ConnectivityResult> result) {
+    return result.contains(ConnectivityResult.mobile) ||
+        result.contains(ConnectivityResult.wifi) ||
+        result.contains(ConnectivityResult.ethernet);
   }
 
   @override

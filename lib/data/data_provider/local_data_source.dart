@@ -28,6 +28,14 @@ abstract class LocalDataSource {
   /// Removes the cached user response (on logout).
   Future<bool> clearUserResponse();
 
+  /// Updates only token fields for the cached user session.
+  ///
+  /// Returns `false` when no cached user exists.
+  Future<bool> updateCachedUserTokens({
+    required String accessToken,
+    required String refreshToken,
+  });
+
   /// Stores [email] and [password] securely.
   ///
   /// ⚠️ Credentials are written to [FlutterSecureStorage] (Keychain on iOS,
@@ -94,6 +102,26 @@ class LocalDataSourceImpl implements LocalDataSource {
   @override
   Future<bool> clearUserResponse() =>
       sharedPreferences.remove(KString.getExistingUserResponseKey);
+
+  @override
+  Future<bool> updateCachedUserTokens({
+    required String accessToken,
+    required String refreshToken,
+  }) async {
+    final jsonData = sharedPreferences.getString(KString.getExistingUserResponseKey);
+    if (jsonData == null || jsonData.isEmpty) return false;
+
+    final existing = LoginResponseModel.fromJson(jsonData);
+    final updated = existing.copyWith(
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    );
+
+    return sharedPreferences.setString(
+      KString.getExistingUserResponseKey,
+      updated.toJson(),
+    );
+  }
 
   // ── Secure credentials ───────────────────────────────────────────────────
 
