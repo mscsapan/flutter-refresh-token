@@ -58,9 +58,9 @@ class LoginBloc extends Bloc<LoginEvent, UserModel> {
 
   void _onTokensUpdated(LoginEventTokensUpdated event, Emitter<UserModel> emit) {
     if (_user == null) return;
-    _user = _user!.copyWith(
+    _user = _user?.copyWith(
       accessToken: event.accessToken,
-      refreshToken: event.refreshToken ?? _user!.refreshToken,
+      refreshToken: event.refreshToken ?? _user?.refreshToken,
     );
     emit(state.copyWith(loginState: LoginLoaded(authResponse: _user)));
   }

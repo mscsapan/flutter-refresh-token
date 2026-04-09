@@ -83,7 +83,7 @@ class DioClient {
         responseType: ResponseType.json,
       ),
     );
-    log('Configured baseUrl: ${EnvConfig.baseUrl}', name: 'DioClient');
+   // log('Configured baseUrl: ${EnvConfig.baseUrl}', name: 'DioClient');
 
     // ── Shared refresh Dio (used by both TokenRefreshService and for retrying) ─
     // Uses a *separate* Dio instance for the refresh call to avoid deadlocks

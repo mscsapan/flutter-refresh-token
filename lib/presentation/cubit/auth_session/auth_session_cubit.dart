@@ -68,7 +68,7 @@ class AuthSessionCubit extends Cubit<AuthSessionState> {
     final success = await _tokenRefreshService.attemptRefresh();
 
     if (!success) {
-      // _performLocalCleanup();
+      _performLocalCleanup();
       final expiredState = const AuthSessionExpired(message: 'Session expired. Please login again.');
       emit(expiredState);
     }
@@ -78,6 +78,10 @@ class AuthSessionCubit extends Cubit<AuthSessionState> {
 
   // ── Internal ─────────────────────────────────────────────────────────────
 
+  /// Clears local tokens when session cannot be recovered.
+  void _performLocalCleanup() {
+    TokenManager.instance.clearTokens();
+  }
 
   @override
   Future<void> close() {
