@@ -77,8 +77,7 @@ class ConnectivityBuilder extends StatefulWidget {
   State<ConnectivityBuilder> createState() => _ConnectivityBuilderState();
 }
 
-class _ConnectivityBuilderState extends State<ConnectivityBuilder>
-    with SingleTickerProviderStateMixin {
+class _ConnectivityBuilderState extends State<ConnectivityBuilder> with SingleTickerProviderStateMixin {
   /// Tracks if the connection was lost at least once. Prevents calling
   /// [onRetry] on the initial app load.
   bool _wasDisconnected = false;
