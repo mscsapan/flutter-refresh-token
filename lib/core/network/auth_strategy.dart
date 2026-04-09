@@ -9,3 +9,6 @@ enum AuthStrategy {
   /// No token attached (public endpoints, refresh endpoint).
   none,
 }
+
+/// Key used inside Dio `Options.extra` to store [AuthStrategy].
+const String authStrategyExtraKey = 'authStrategy';

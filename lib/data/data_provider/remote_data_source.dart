@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 
+import '../../core/network/auth_strategy.dart';
 import '../models/auth/user_model.dart';
 import 'network_parser.dart';
 import 'remote_url.dart';
@@ -35,13 +35,21 @@ class RemoteDataSourceImpl implements RemoteDataSource {
 
   RemoteDataSourceImpl({required this.dio});
 
+  Options _authOptions(AuthStrategy strategy) {
+    return Options(extra: {authStrategyExtraKey: strategy});
+  }
+
   // ── Auth ──────────────────────────────────────────────────────────────────
 
   @override
   Future<dynamic> login(UserModel? body) {
     // debugPrint('body ${body?.userInfo?.toMap()}');
     return DioNetworkParser.call(
-      () => dio.post(RemoteUrls.login, data: body?.userInfo?.toMap()??{}),
+      () => dio.post(
+        RemoteUrls.login,
+        data: body?.userInfo?.toMap() ?? {},
+        options: _authOptions(AuthStrategy.none),
+      ),
     );
   }
 
@@ -59,6 +67,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       () => dio.post(
         RemoteUrls.refreshToken,
         data: {'token': refreshToken},
+        options: _authOptions(AuthStrategy.none),
       ),
     );
   }

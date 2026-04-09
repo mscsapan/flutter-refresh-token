@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/services/navigation_service.dart';
 import '../../data/models/auth/user_model.dart';
 import '../bloc/auth/login_bloc.dart';
+import '../bloc/internet_status/internet_status_bloc.dart';
 import '../cubit/auth_session/auth_session_cubit.dart';
 import '../cubit/auth_session/auth_session_state.dart';
 import '../routes/route_names.dart';
@@ -40,7 +41,7 @@ class SessionListenerWrapper extends StatelessWidget {
           listenWhen: (previous, current) => current is AuthSessionExpired,
           listener: (context, state) {
             if (state is AuthSessionExpired) {
-              _handleSessionExpired(context, state.message);
+              _handleSessionExpired(state.message);
             }
           },
         ),
@@ -53,7 +54,7 @@ class SessionListenerWrapper extends StatelessWidget {
           listener: (context, login) {
             final state = login.loginState;
             if (state is SessionExpired) {
-              _handleSessionExpired(context, state.message);
+              _handleSessionExpired(state.message);
             }
           },
         ),
@@ -62,12 +63,11 @@ class SessionListenerWrapper extends StatelessWidget {
     );
   }
 
-  void _handleSessionExpired(BuildContext context, String message) {
-    NavigationService.errorSnackBar(context, message);
-
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      RouteNames.authScreen,
-      (route) => false,
-    );
+  void _handleSessionExpired(String message) {
+    final appContext = NavigationService.context;
+    if (appContext != null) {
+      NavigationService.errorSnackBar(appContext, message);
+    }
+    NavigationService.navigateToAndClearStack(RouteNames.authScreen);
   }
 }

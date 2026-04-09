@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:async';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -21,10 +22,14 @@ class TokenManager {
   static const _refreshTokenKey = 'secure_refresh_token';
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  final StreamController<TokenSnapshot> _tokenController = StreamController<TokenSnapshot>.broadcast();
 
   // ── In-memory cache ──────────────────────────────────────────────────────
   String? _cachedAccessToken;
   String? _cachedRefreshToken;
+
+  /// Emits whenever tokens are saved/cleared so presentation state can stay in sync.
+  Stream<TokenSnapshot> get tokenChanges => _tokenController.stream;
 
   // ── Access Token ─────────────────────────────────────────────────────────
 
@@ -40,6 +45,7 @@ class TokenManager {
   Future<void> saveAccessToken(String token) async {
     _cachedAccessToken = token;
     await _secureStorage.write(key: _accessTokenKey, value: token);
+    _tokenController.add(TokenSnapshot(accessToken: _cachedAccessToken, refreshToken: _cachedRefreshToken));
     log('Access token saved', name: _tag);
   }
 
@@ -56,6 +62,7 @@ class TokenManager {
   Future<void> saveRefreshToken(String token) async {
     _cachedRefreshToken = token;
     await _secureStorage.write(key: _refreshTokenKey, value: token);
+    _tokenController.add(TokenSnapshot(accessToken: _cachedAccessToken, refreshToken: _cachedRefreshToken));
     log('Refresh token saved', name: _tag);
   }
 
@@ -79,16 +86,28 @@ class TokenManager {
       _secureStorage.delete(key: _accessTokenKey),
       _secureStorage.delete(key: _refreshTokenKey),
     ]);
+    _tokenController.add(const TokenSnapshot(accessToken: null, refreshToken: null));
     log('Tokens cleared', name: _tag);
   }
 
   /// Whether we have a cached access token (synchronous check).
-  bool get hasToken => _cachedAccessToken != null && _cachedAccessToken!.isNotEmpty;
+  bool get hasToken => _cachedAccessToken != null && (_cachedAccessToken?.isNotEmpty??false);
 
   /// Loads tokens from secure storage into memory. Call once at app start.
   Future<void> init() async {
     _cachedAccessToken = await _secureStorage.read(key: _accessTokenKey);
     _cachedRefreshToken = await _secureStorage.read(key: _refreshTokenKey);
+    _tokenController.add(TokenSnapshot(accessToken: _cachedAccessToken, refreshToken: _cachedRefreshToken));
     log('TokenManager initialized (has token: $hasToken)', name: _tag);
   }
+}
+
+class TokenSnapshot {
+  final String? accessToken;
+  final String? refreshToken;
+
+  const TokenSnapshot({
+    required this.accessToken,
+    required this.refreshToken,
+  });
 }

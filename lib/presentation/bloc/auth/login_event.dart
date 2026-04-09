@@ -33,3 +33,13 @@ class LoginEventSessionExpired extends LoginEvent {
   @override
   List<Object?> get props => [message];
 }
+
+class LoginEventTokensUpdated extends LoginEvent {
+  final String accessToken;
+  final String? refreshToken;
+
+  const LoginEventTokensUpdated({required this.accessToken, this.refreshToken});
+
+  @override
+  List<Object?> get props => [accessToken, refreshToken];
+}

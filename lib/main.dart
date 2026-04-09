@@ -10,6 +10,7 @@ import 'presentation/routes/route_names.dart';
 import 'presentation/utils/constraints.dart';
 import 'presentation/widgets/custom_theme.dart';
 import 'presentation/widgets/fetch_error_text.dart';
+import 'presentation/widgets/connectivity_listener_wrapper.dart';
 import 'presentation/widgets/session_listener_wrapper.dart';
 
 Future<void> main() async {
@@ -41,8 +42,7 @@ class TemplateProject extends StatelessWidget {
           providers: DInjector.repositoryProvider,
           child: MultiBlocProvider(
             providers: DInjector.blocProviders,
-            child: SessionListenerWrapper(
-              child: MaterialApp(
+            child: MaterialApp(
               navigatorKey: NavigationService.navigatorKey,
               debugShowCheckedModeBanner: false,
               onGenerateRoute: RouteNames.generateRoutes,
@@ -61,14 +61,17 @@ class TemplateProject extends StatelessWidget {
                 );
               },
               builder: (context, child) {
-                return MediaQuery(
-                  data: MediaQuery.of(
-                    context,
-                  ).copyWith(textScaler: const TextScaler.linear(1.0)),
-                  child: child ?? SizedBox(),
+                return SessionListenerWrapper(
+                  child: ConnectivityListenerWrapper(
+                    child: MediaQuery(
+                      data: MediaQuery.of(
+                        context,
+                      ).copyWith(textScaler: const TextScaler.linear(1.0)),
+                      child: child ?? const SizedBox(),
+                    ),
+                  ),
                 );
               },
-            ),
             ),
           ),
         );

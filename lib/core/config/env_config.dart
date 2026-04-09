@@ -52,7 +52,7 @@ class EnvConfig {
   static bool get enableRefreshToken {
     switch (_environment) {
       case Environment.development:
-        return true; // ← Change to true once backend supports it
+        return false; // ← Change to true once backend supports it
       case Environment.staging:
         return false; // ← Change to true once backend supports it
       case Environment.production:

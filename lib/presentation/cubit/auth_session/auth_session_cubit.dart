@@ -1,9 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/network/dio_client.dart';
 import '../../../core/network/token_manager.dart';
 import '../../../core/network/token_refresh_service.dart';
 import 'auth_session_state.dart';
@@ -70,7 +68,7 @@ class AuthSessionCubit extends Cubit<AuthSessionState> {
     final success = await _tokenRefreshService.attemptRefresh();
 
     if (!success) {
-      _performLocalCleanup();
+      // _performLocalCleanup();
       final expiredState = const AuthSessionExpired(message: 'Session expired. Please login again.');
       emit(expiredState);
     }
@@ -80,12 +78,6 @@ class AuthSessionCubit extends Cubit<AuthSessionState> {
 
   // ── Internal ─────────────────────────────────────────────────────────────
 
-  /// Clears tokens and resets the Dio singleton so a fresh instance with clean
-  /// state is created on the next login.
-  void _performLocalCleanup() {
-    TokenManager.instance.clearTokens();
-    DioClient.reset();
-  }
 
   @override
   Future<void> close() {
