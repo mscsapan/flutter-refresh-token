@@ -1,7 +1,7 @@
-import 'package:bloc/bloc.dart';
 import 'package:bloc_clean_architecture/data/mappers/home/home_mapper.dart';
 import 'package:bloc_clean_architecture/data/models/home/home_model.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/usecases/home/home_usecases.dart';
 
@@ -13,6 +13,8 @@ class HomeCubit extends Cubit<HomeState> {
   HomeCubit({required HomeDataUseCases userCase})
     : _useCase = userCase,
       super(HomeInitial());
+
+  List<HomeModel?>? homeModel;
 
   Future<void> getSetting() async {
     emit(HomeLoading());
@@ -26,8 +28,8 @@ class HomeCubit extends Cubit<HomeState> {
         emit(errors);
       },
       (settings) {
-        final home = settings?.map((e) => e?.toData()).toList();
-        emit(HomeLoaded(home));
+        homeModel = settings?.map((e) => e?.toData()).toList();
+        emit(HomeLoaded(homeModel));
       },
     );
   }
