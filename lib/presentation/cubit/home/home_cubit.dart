@@ -14,6 +14,8 @@ class HomeCubit extends Cubit<HomeState> {
     : _useCase = userCase,
       super(HomeInitial());
 
+  List<HomeModel?> ? homeModel;
+
   Future<void> getSetting() async {
     emit(HomeLoading());
 
@@ -26,8 +28,8 @@ class HomeCubit extends Cubit<HomeState> {
         emit(errors);
       },
       (settings) {
-        final home = settings?.map((e) => e?.toData()).toList();
-        emit(HomeLoaded(home));
+        homeModel = settings?.map((e) => e?.toData()).toList();
+        emit(HomeLoaded(homeModel));
       },
     );
   }
