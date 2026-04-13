@@ -17,8 +17,6 @@ class CustomText extends StatelessWidget {
     this.decoration = TextDecoration.none,
     this.overflow = TextOverflow.ellipsis,
     this.textAlign = TextAlign.start,
-    this.isRoboto = true,
-    this.fontFamily = bold700,
   });
   final String text;
   final Color color;
@@ -29,12 +27,9 @@ class CustomText extends StatelessWidget {
   final int maxLine;
   final TextOverflow overflow;
   final TextDecoration decoration;
-  final bool isRoboto;
-  final String fontFamily;
 
   @override
   Widget build(BuildContext context) {
-    if (isRoboto) {
       return Padding(
         padding: Utils.only(bottom: 2.0),
         child: Text(
@@ -51,21 +46,6 @@ class CustomText extends StatelessWidget {
           ),
         ),
       );
-    } else {
-      return Text(
-        text,
-        textAlign: textAlign,
-        overflow: overflow,
-        maxLines: maxLine,
-        style: TextStyle(
-          fontWeight: fontWeight,
-          fontSize: fontSize.sp,
-          color: color,
-          fontFamily: fontFamily,
-          height: height.h,
-          decoration: decoration,
-        ),
-      );
-    }
+
   }
 }
